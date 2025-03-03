@@ -1,18 +1,20 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { AuthGuard } from '../auth/auth.guard';
 
-@UseGuards(AuthGuard)
 @Controller('bofans/category')
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
   @Get('list')
-  async getCategories() {
-    const categories = await this.categoryService.categories();
+  async getCategories(@Query('all') all?: string) {
+    const categories = await this.categoryService.categories({
+      all: all === 'true',
+    });
     return categories;
   }
 
+  @UseGuards(AuthGuard)
   @Post('create')
   async createCategory(
     @Body()

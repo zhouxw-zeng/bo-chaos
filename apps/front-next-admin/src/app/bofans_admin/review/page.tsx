@@ -18,11 +18,35 @@ import {
   batchReviewReject,
 } from "@/api/bofans/review";
 import { Photo } from "@mono/prisma-client";
+import { getCategories } from "@/api/bofans/category"; // 需要添加分类API
+
+// 扩展Photo类型，添加分类名称
+interface PhotoWithCategory extends Photo {
+  categoryName?: string;
+}
 
 export default function PhotoReviewPage() {
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [photos, setPhotos] = useState<PhotoWithCategory[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Record<number, string>>({});
+
+  // 获取分类数据
+  const fetchCategories = useCallback(async () => {
+    try {
+      const data = await getCategories();
+      const categoryMap = data.reduce(
+        (acc, category) => {
+          acc[category.id] = category.name || category.secondCategory;
+          return acc;
+        },
+        {} as Record<number, string>,
+      );
+      setCategories(categoryMap);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  }, []);
 
   const fetchPhotos = useCallback(async () => {
     try {
@@ -37,8 +61,9 @@ export default function PhotoReviewPage() {
   }, []);
 
   useEffect(() => {
+    fetchCategories();
     fetchPhotos();
-  }, [fetchPhotos]);
+  }, [fetchPhotos, fetchCategories]);
 
   const handleSelectAll = useCallback(
     (checked: boolean) => {
@@ -83,6 +108,37 @@ export default function PhotoReviewPage() {
     }
   }, [selectedIds, fetchPhotos]);
 
+  // 添加单行操作函数
+  const handleSingleApprove = useCallback(
+    async (id: number) => {
+      try {
+        setLoading(true);
+        await batchReviewPass([id]);
+        await fetchPhotos();
+      } catch (error) {
+        console.error("Failed to approve photo:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchPhotos],
+  );
+
+  const handleSingleReject = useCallback(
+    async (id: number) => {
+      try {
+        setLoading(true);
+        await batchReviewReject([id]);
+        await fetchPhotos();
+      } catch (error) {
+        console.error("Failed to reject photo:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchPhotos],
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -95,14 +151,14 @@ export default function PhotoReviewPage() {
             onClick={handleApprove}
             disabled={selectedIds.length === 0 || loading}
           >
-            通过
+            批量通过
           </Button>
           <Button
             variant="destructive"
             onClick={handleReject}
             disabled={selectedIds.length === 0 || loading}
           >
-            拒绝
+            批量拒绝
           </Button>
         </div>
         <div className="rounded-md border">
@@ -111,7 +167,9 @@ export default function PhotoReviewPage() {
               <TableRow>
                 <TableHead className="w-12">
                   <Checkbox
-                    checked={selectedIds.length === photos.length}
+                    checked={
+                      selectedIds.length === photos.length && photos.length > 0
+                    }
                     onCheckedChange={handleSelectAll}
                     aria-label="全选"
                   />
@@ -119,7 +177,9 @@ export default function PhotoReviewPage() {
                 <TableHead>预览</TableHead>
                 <TableHead>文件名</TableHead>
                 <TableHead>分类ID</TableHead>
+                <TableHead>分类名称</TableHead>
                 <TableHead>上传者</TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -143,12 +203,36 @@ export default function PhotoReviewPage() {
                   </TableCell>
                   <TableCell>{photo.name || photo.filename}</TableCell>
                   <TableCell>{photo.categoryId}</TableCell>
+                  <TableCell>
+                    {categories[photo.categoryId] || "未知分类"}
+                  </TableCell>
                   <TableCell>{photo.authorOpenId}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSingleApprove(photo.id)}
+                        disabled={loading}
+                      >
+                        通过
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-500 hover:bg-red-50"
+                        onClick={() => handleSingleReject(photo.id)}
+                        disabled={loading}
+                      >
+                        拒绝
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
               {photos.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={7} className="text-center">
                     暂无待审核的图片
                   </TableCell>
                 </TableRow>

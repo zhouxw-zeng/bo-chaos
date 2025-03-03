@@ -6,7 +6,14 @@ import { Prisma } from '@mono/prisma-client';
 export class CategoryService {
   constructor(private prisma: PrismaService) {}
 
-  async categories() {
+  async categories({ all }: { all?: boolean }) {
+    if (all) {
+      return this.prisma.category.findMany({
+        orderBy: {
+          updatedAt: 'desc',
+        },
+      });
+    }
     return this.prisma.category.findMany({
       where: {
         published: true,
