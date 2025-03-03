@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { AuthGuard } from '../auth/auth.guard';
-
+@UseGuards(AuthGuard)
 @Controller('bofans/category')
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
@@ -14,7 +14,6 @@ export class CategoryController {
     return categories;
   }
 
-  @UseGuards(AuthGuard)
   @Post('create')
   async createCategory(
     @Body()

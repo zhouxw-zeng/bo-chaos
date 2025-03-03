@@ -3,12 +3,16 @@ import {
   Get,
   Post,
   Body,
+  Res,
   UseGuards,
   Request,
   UploadedFile,
   UseInterceptors,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import * as FormData from 'form-data';
@@ -17,11 +21,32 @@ import { env } from '@/const/env';
 import { UsersService } from './users.service';
 import { AuthGuard } from '../auth/auth.guard';
 
-@UseGuards(AuthGuard)
 @Controller('bofans/users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
+  @Post('login')
+  async login(
+    @Body() loginDto: { account: string; password: string },
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    if (
+      loginDto.account === 'zhangyiming' &&
+      loginDto.password === 'geiyuanboketou'
+    ) {
+      const token = await this.jwtService.signAsync({
+        account: loginDto.account,
+      });
+      response.cookie('token', token);
+      return true;
+    }
+    throw new UnauthorizedException('用户名密码错误');
+  }
+
+  @UseGuards(AuthGuard)
   @Get('userInfo')
   async userInfo(@Request() req: { user: { openId: string } }) {
     return await this.usersService.user({
@@ -29,6 +54,7 @@ export class UsersController {
     });
   }
 
+  @UseGuards(AuthGuard)
   @Post('updateNickname')
   async updateNickname(
     @Request() req: { user: { openId: string } },
@@ -46,6 +72,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post('updateAvatar')
   @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() })) // 显式配置内存存储
   async updateAvatar(

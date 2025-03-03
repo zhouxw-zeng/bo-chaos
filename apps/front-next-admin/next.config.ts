@@ -5,14 +5,14 @@ const nextConfig: NextConfig = {
 
   rewrites: async () => {
     return [
-      // {
-      //   source: "/api/:path*",
-      //   destination: "http://localhost:3000/bofans/:path*",
-      // },
       {
         source: "/api/:path*",
-        destination: "https://yuanbo.online/rpg/bofans/:path*",
+        destination: "http://localhost:3000/bofans/:path*",
       },
+      // {
+      //   source: "/api/:path*",
+      //   destination: "https://yuanbo.online/rpg/bofans/:path*",
+      // },
     ];
   },
 };

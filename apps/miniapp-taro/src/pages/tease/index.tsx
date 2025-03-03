@@ -124,47 +124,45 @@ export default function Tease() {
   };
 
   return (
-    <View className="tease-container">
-      <ScrollView
-        scrollY
-        className="scroll-container"
-        refresherEnabled
-        enableBackToTop
-        refresherTriggered={refreshing}
-        onRefresherRefresh={onRefresh}
-      >
-        <BoSheng boxStyle={{ padding: "10px 0 10px" }} />
-        {photos.length === 0 ? (
-          <View className="empty-state">
-            <Text>暂无数据</Text>
-          </View>
-        ) : (
-          <View className="waterfall">
-            {columns.map((column, columnIndex) => (
-              <View key={columnIndex} className="column">
-                {column.map(
-                  (photo: PhotoDataType & { calculatedHeight?: number }) => (
-                    <PhotoItem
-                      key={photo.id}
-                      photoData={photo}
-                      onPreview={(url) => {
-                        Taro.previewImage({
-                          current: photo.filename,
-                          urls: photos.map((p) => p.filename),
-                        });
-                      }}
-                      size={{
-                        width: "100%",
-                        height: `${photo.calculatedHeight}px`,
-                      }}
-                    />
-                  ),
-                )}
-              </View>
-            ))}
-          </View>
-        )}
-      </ScrollView>
-    </View>
+    <ScrollView
+      scrollY
+      className="tease-container"
+      refresherEnabled
+      enableBackToTop
+      refresherTriggered={refreshing}
+      onRefresherRefresh={onRefresh}
+    >
+      <BoSheng boxStyle={{ padding: "10px 0 10px" }} />
+      {photos.length === 0 ? (
+        <View className="empty-state">
+          <Text>暂无数据</Text>
+        </View>
+      ) : (
+        <View className="waterfall">
+          {columns.map((column, columnIndex) => (
+            <View key={columnIndex} className="column">
+              {column.map(
+                (photo: PhotoDataType & { calculatedHeight?: number }) => (
+                  <PhotoItem
+                    key={photo.id}
+                    photoData={photo}
+                    onPreview={(url) => {
+                      Taro.previewImage({
+                        current: photo.filename,
+                        urls: photos.map((p) => p.filename),
+                      });
+                    }}
+                    size={{
+                      width: "100%",
+                      height: `${photo.calculatedHeight}px`,
+                    }}
+                  />
+                ),
+              )}
+            </View>
+          ))}
+        </View>
+      )}
+    </ScrollView>
   );
 }

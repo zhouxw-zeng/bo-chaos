@@ -12,3 +12,17 @@ function _fetch(url: string, options?: RequestInit) {
 export async function getCategories(): Promise<Category[]> {
   return await _fetch("/category/list?all=true").then((res) => res.json());
 }
+
+export async function createCategory(data: {
+  system: string;
+  name: string;
+  secondCategory: string;
+}): Promise<boolean> {
+  return await _fetch("/category/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  }).then((res) => res.json());
+}

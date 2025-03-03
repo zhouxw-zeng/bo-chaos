@@ -118,67 +118,61 @@ export default function Travel() {
   };
 
   return (
-    <View className="travel-container">
-      <ScrollView
-        scrollY
-        className="scroll-container"
-        refresherEnabled
-        enableBackToTop
-        refresherTriggered={refreshing}
-        onRefresherRefresh={onRefresh}
-      >
-        <BoSheng boxStyle={{ padding: "20px 20px 4px" }} />
-        {photoData.length > 0 ? (
-          photoData.map((category) => (
-            <View key={category.secondCategory} className="category-section">
-              <View
-                className={`category-header ${
-                  activeCategory === category.secondCategory ? "active" : ""
-                }`}
-                onClick={() => handleCategoryClick(category.secondCategory)}
-              >
-                <View className="category-title">
-                  <Text className="category-name">
-                    {category.secondCategory}
-                  </Text>
-                  <Text className="photo-count">
-                    ({category.photos.length})
-                  </Text>
-                </View>
-                <Text className="arrow">
-                  {activeCategory === category.secondCategory ? "▼" : "▶"}
-                </Text>
+    <ScrollView
+      scrollY
+      className="travel-container"
+      refresherEnabled
+      enableBackToTop
+      refresherTriggered={refreshing}
+      onRefresherRefresh={onRefresh}
+    >
+      <BoSheng boxStyle={{ padding: "20px 20px 4px" }} />
+      {photoData.length > 0 ? (
+        photoData.map((category) => (
+          <View key={category.secondCategory} className="category-section">
+            <View
+              className={`category-header ${
+                activeCategory === category.secondCategory ? "active" : ""
+              }`}
+              onClick={() => handleCategoryClick(category.secondCategory)}
+            >
+              <View className="category-title">
+                <Text className="category-name">{category.secondCategory}</Text>
+                <Text className="photo-count">({category.photos.length})</Text>
               </View>
-
-              {activeCategory === category.secondCategory && (
-                <View className="photo-grid">
-                  {category.photos.map((photo) => (
-                    <View key={photo.id} className="photo-item-wrapper">
-                      <PhotoItem
-                        photoData={photo}
-                        onPreview={(url) =>
-                          handlePreview(
-                            url,
-                            category.photos.map((p) => p.filename),
-                          )
-                        }
-                        size={{
-                          height: "200px",
-                          width: "100%",
-                        }}
-                      />
-                    </View>
-                  ))}
-                </View>
-              )}
+              <Text className="arrow">
+                {activeCategory === category.secondCategory ? "▼" : "▶"}
+              </Text>
             </View>
-          ))
-        ) : (
-          <View className="empty-state">
-            <Text>暂无数据</Text>
+
+            {activeCategory === category.secondCategory && (
+              <View className="photo-grid">
+                {category.photos.map((photo) => (
+                  <View key={photo.id} className="photo-item-wrapper">
+                    <PhotoItem
+                      photoData={photo}
+                      onPreview={(url) =>
+                        handlePreview(
+                          url,
+                          category.photos.map((p) => p.filename),
+                        )
+                      }
+                      size={{
+                        height: "200px",
+                        width: "100%",
+                      }}
+                    />
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
-        )}
-      </ScrollView>
-    </View>
+        ))
+      ) : (
+        <View className="empty-state">
+          <Text>暂无数据</Text>
+        </View>
+      )}
+    </ScrollView>
   );
 }

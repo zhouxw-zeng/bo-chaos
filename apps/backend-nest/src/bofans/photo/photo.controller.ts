@@ -23,6 +23,7 @@ import { CategoryService } from '../category/category.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Photo, PhotoVote } from '@mono/prisma-client';
 
+@UseGuards(AuthGuard)
 @Controller('bofans/photo')
 export class PhotoController {
   constructor(
@@ -31,7 +32,6 @@ export class PhotoController {
     private usersService: UsersService,
   ) {}
 
-  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get('list/:system')
   async photoList(
@@ -77,7 +77,6 @@ export class PhotoController {
     return res;
   }
 
-  @UseGuards(AuthGuard)
   @Get('get/:id')
   async photo(
     @Request() req: { user: { openId: string } },
@@ -120,7 +119,6 @@ export class PhotoController {
     return null;
   }
 
-  @UseGuards(AuthGuard)
   @Post('vote')
   async vote(
     @Request() req: { user: { openId: string } },
@@ -165,7 +163,6 @@ export class PhotoController {
     }
   }
 
-  @UseGuards(AuthGuard)
   @Post('cancelVote')
   async cancelVote(
     @Request() req: { user: { openId: string } },
@@ -182,7 +179,6 @@ export class PhotoController {
     });
   }
 
-  @UseGuards(AuthGuard)
   @Post('upload_photo')
   @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() }))
   async uploadPhoto(
@@ -287,7 +283,6 @@ export class PhotoController {
     }
   }
 
-  @UseGuards(AuthGuard)
   @Get('myUploaded')
   async myUploaded(@Request() req: { user: { openId: string } }) {
     const openId = req.user.openId;
@@ -308,16 +303,7 @@ export class PhotoController {
   }
 
   @Post('batchReviewPass')
-  async batchReviewPass(
-    // @Request() req: { user: { openId: string } },
-    @Body() photoDto: { ids: number[] },
-  ) {
-    // const openId = req.user.openId;
-    // const user = await this.usersService.user({ openId });
-    // if (!user || !user.photoReviewer) {
-    //   throw new ForbiddenException('无权限');
-    // }
-    // Logger.log(`openId ${openId} passed photos ${photoDto.ids.join(',')}`);
+  async batchReviewPass(@Body() photoDto: { ids: number[] }) {
     return this.photoService.updatePhotos({
       where: {
         id: {
@@ -331,16 +317,7 @@ export class PhotoController {
   }
 
   @Post('batchReviewReject')
-  async batchReviewReject(
-    // @Request() req: { user: { openId: string } },
-    @Body() photoDto: { ids: number[] },
-  ) {
-    // const openId = req.user.openId;
-    // const user = await this.usersService.user({ openId });
-    // if (!user || !user.photoReviewer) {
-    //   throw new ForbiddenException('无权限');
-    // }
-    // Logger.log(`openId ${openId} reject photos ${photoDto.ids.join(',')}`);
+  async batchReviewReject(@Body() photoDto: { ids: number[] }) {
     return this.photoService.deletePhotos({
       id: {
         in: photoDto.ids,

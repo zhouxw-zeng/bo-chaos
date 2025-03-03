@@ -18,33 +18,43 @@ import {
   batchReviewReject,
 } from "@/api/bofans/review";
 import { Photo } from "@mono/prisma-client";
-import { getCategories } from "@/api/bofans/category"; // 需要添加分类API
+import { getCategories, createCategory } from "@/api/bofans/category"; // 需要添加分类API
 
 // 扩展Photo类型，添加分类名称
 interface PhotoWithCategory extends Photo {
   categoryName?: string;
 }
 
+// 分类信息接口
+interface CategoryInfo {
+  id: number;
+  system: string; // 一级分类
+  name: string; // 一级分类名称
+  secondCategory: string; // 二级分类
+}
+
 export default function PhotoReviewPage() {
   const [photos, setPhotos] = useState<PhotoWithCategory[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Record<number, string>>({});
+  const [categoryMap, setCategoryMap] = useState<Record<number, CategoryInfo>>(
+    {},
+  );
 
   // 获取分类数据
   const fetchCategories = useCallback(async () => {
     try {
       const data = await getCategories();
-      const categoryMap = data.reduce(
+      const map = data.reduce(
         (acc, category) => {
-          acc[category.id] = category.name || category.secondCategory;
+          acc[category.id] = category;
           return acc;
         },
-        {} as Record<number, string>,
+        {} as Record<number, CategoryInfo>,
       );
-      setCategories(categoryMap);
+      setCategoryMap(map);
     } catch (error) {
-      console.error("Failed to fetch categories:", error);
+      console.error("获取分类数据失败:", error);
     }
   }, []);
 
@@ -54,7 +64,7 @@ export default function PhotoReviewPage() {
       const data = await getReviewList();
       setPhotos(data);
     } catch (error) {
-      console.error("Failed to fetch photos:", error);
+      console.error("获取照片列表失败:", error);
     } finally {
       setLoading(false);
     }
@@ -87,7 +97,7 @@ export default function PhotoReviewPage() {
       setSelectedIds([]);
       await fetchPhotos();
     } catch (error) {
-      console.error("Failed to approve photos:", error);
+      console.error("批量通过失败:", error);
     } finally {
       setLoading(false);
     }
@@ -102,7 +112,7 @@ export default function PhotoReviewPage() {
       setSelectedIds([]);
       await fetchPhotos();
     } catch (error) {
-      console.error("Failed to reject photos:", error);
+      console.error("批量拒绝失败:", error);
     } finally {
       setLoading(false);
     }
@@ -116,7 +126,7 @@ export default function PhotoReviewPage() {
         await batchReviewPass([id]);
         await fetchPhotos();
       } catch (error) {
-        console.error("Failed to approve photo:", error);
+        console.error("通过失败:", error);
       } finally {
         setLoading(false);
       }
@@ -131,7 +141,7 @@ export default function PhotoReviewPage() {
         await batchReviewReject([id]);
         await fetchPhotos();
       } catch (error) {
-        console.error("Failed to reject photo:", error);
+        console.error("拒绝失败:", error);
       } finally {
         setLoading(false);
       }
@@ -175,64 +185,65 @@ export default function PhotoReviewPage() {
                   />
                 </TableHead>
                 <TableHead>预览</TableHead>
-                <TableHead>文件名</TableHead>
-                <TableHead>分类ID</TableHead>
-                <TableHead>分类名称</TableHead>
+                <TableHead>一级分类</TableHead>
+                <TableHead>二级分类</TableHead>
                 <TableHead>上传者</TableHead>
                 <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {photos.map((photo) => (
-                <TableRow key={photo.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedIds.includes(photo.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectOne(!!checked, photo.id)
-                      }
-                      aria-label={`选择图片 ${photo.id}`}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <img
-                      src={photo.filename}
-                      alt={photo.name || "预览图"}
-                      className="h-20 w-20 object-cover"
-                    />
-                  </TableCell>
-                  <TableCell>{photo.name || photo.filename}</TableCell>
-                  <TableCell>{photo.categoryId}</TableCell>
-                  <TableCell>
-                    {categories[photo.categoryId] || "未知分类"}
-                  </TableCell>
-                  <TableCell>{photo.authorOpenId}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSingleApprove(photo.id)}
-                        disabled={loading}
-                      >
-                        通过
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-red-500 hover:bg-red-50"
-                        onClick={() => handleSingleReject(photo.id)}
-                        disabled={loading}
-                      >
-                        拒绝
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {photos.map((photo) => {
+                const category = categoryMap[photo.categoryId];
+                return (
+                  <TableRow key={photo.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.includes(photo.id)}
+                        onCheckedChange={(checked) =>
+                          handleSelectOne(!!checked, photo.id)
+                        }
+                        aria-label={`选择图片 ${photo.id}`}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <img
+                        src={photo.filename}
+                        alt="预览图"
+                        className="h-20 w-20 object-cover"
+                      />
+                    </TableCell>
+                    <TableCell>{category?.name || "未知分类"}</TableCell>
+                    <TableCell>
+                      {category?.secondCategory || "未知分类"}
+                    </TableCell>
+                    <TableCell>{photo.authorOpenId}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSingleApprove(photo.id)}
+                          disabled={loading}
+                        >
+                          通过
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-500 hover:bg-red-50"
+                          onClick={() => handleSingleReject(photo.id)}
+                          disabled={loading}
+                        >
+                          拒绝
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {photos.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     暂无待审核的图片
                   </TableCell>
                 </TableRow>
