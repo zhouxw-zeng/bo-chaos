@@ -129,6 +129,7 @@ export default function Tease() {
         scrollY
         className="scroll-container"
         refresherEnabled
+        enableBackToTop
         refresherTriggered={refreshing}
         onRefresherRefresh={onRefresh}
       >

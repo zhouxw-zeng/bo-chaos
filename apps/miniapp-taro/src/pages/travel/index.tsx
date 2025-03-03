@@ -123,6 +123,7 @@ export default function Travel() {
         scrollY
         className="scroll-container"
         refresherEnabled
+        enableBackToTop
         refresherTriggered={refreshing}
         onRefresherRefresh={onRefresh}
       >

@@ -214,12 +214,16 @@ export default function My() {
 
   const handleAddImages = async () => {
     try {
-      const res = await Taro.chooseImage({
-        count: 9,
-        sizeType: ["compressed"],
+      const res = await Taro.chooseMedia({
+        count: 20,
+        mediaType: ["image"],
         sourceType: ["album", "camera"],
+        sizeType: ["compressed"],
       });
-      setSelectedImages((prev) => [...prev, ...res.tempFilePaths]);
+      setSelectedImages((prev) => [
+        ...prev,
+        ...res.tempFiles.map((f) => f.tempFilePath),
+      ]);
     } catch (error) {
       console.error("选择图片失败:", error);
     }
@@ -324,6 +328,7 @@ export default function My() {
         scrollY
         className="scroll-container"
         refresherEnabled
+        enableBackToTop
         refresherTriggered={refreshing}
         onRefresherRefresh={onRefresh}
       >
@@ -465,15 +470,20 @@ export default function My() {
                         mode="aspectFit"
                         className="preview-image"
                       />
-                      <View
-                        className="remove-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage(index);
-                        }}
-                      >
-                        ✕
-                      </View>
+                      {uploadStatus[index] && (
+                        <View className="upload-success">✓</View>
+                      )}
+                      {!isSubmitting && (
+                        <View
+                          className="remove-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(index);
+                          }}
+                        >
+                          ✕
+                        </View>
+                      )}
                     </View>
                   ))}
                 </View>

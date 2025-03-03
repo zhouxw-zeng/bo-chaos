@@ -136,6 +136,7 @@ export default function History() {
         scrollY
         className="scroll-container"
         refresherEnabled
+        enableBackToTop
         refresherTriggered={refreshing}
         onRefresherRefresh={onRefresh}
       >
