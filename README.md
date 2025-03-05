@@ -60,5 +60,5 @@ astro退休倒计时
     - [ ] 审核状态分为审核中、已通过、已驳回，分三个tab，tab上标识数量，分页
  
 Work FLow
-[ ] astro、后端、管理端分三个Action各自更新
-[ ] GitHub Action增加push更新识别，判断那个apps更新，触发对应流水线
+- [ ] astro、后端、管理端分三个Action各自更新
+- [ ] GitHub Action增加push更新识别，判断那个apps更新，触发对应流水线
