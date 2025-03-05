@@ -5,9 +5,6 @@
   "keywords": [],
   "types": "dist/index.d.ts",
   "main": "./dist/index.js",
-  "exports": {
-    ".": "./src/index.ts"
-  },
   "scripts": {
     "prod": "pnpm run build",
     "prebuild": "rimraf ./dist",
