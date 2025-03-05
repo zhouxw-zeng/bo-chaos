@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Query,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { AuthGuard } from '../auth/auth.guard';
 @UseGuards(AuthGuard)
@@ -17,7 +26,7 @@ export class CategoryController {
   @Post('create')
   async createCategory(
     @Body()
-    categoryData: {
+    categoryDto: {
       system: string;
       name: string;
       secondCategory: string;
@@ -25,11 +34,13 @@ export class CategoryController {
   ) {
     try {
       await this.categoryService.createCategory({
-        ...categoryData,
+        ...categoryDto,
+        author: { connect: { openId: 'system' } },
       });
       return true;
-    } catch {
-      return false;
+    } catch (e) {
+      Logger.error(`Create category failed: ${e}`);
+      throw new BadRequestException(e);
     }
   }
 }

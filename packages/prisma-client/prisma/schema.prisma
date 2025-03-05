@@ -35,7 +35,7 @@ model Category {
   name      String
   secondCategory String @default("default")
   author    User?    @relation(fields: [authorOpenId], references: [openId], name: "UserCategories")
-  authorOpenId  String
+  authorOpenId  String?
   updatedAt DateTime @updatedAt
   photos    Photo[]
   @@unique([name, secondCategory])

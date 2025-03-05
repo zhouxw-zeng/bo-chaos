@@ -8,7 +8,7 @@ export async function getReviewList(): Promise<Photo[]> {
 }
 
 export async function batchReviewPass(
-  photos: { id: number; categoryId: number }[][],
+  photos: { id: number; categoryId: number }[],
 ): Promise<void> {
   await apiFetch("/photo/batchReviewPass", {
     method: "POST",

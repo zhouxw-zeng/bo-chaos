@@ -8,6 +8,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -69,6 +70,7 @@ export default function PhotoReviewPage() {
   const [batchMode, setBatchMode] = useState<"current" | "new">("current");
   const [batchCategory, setBatchCategory] = useState<number | null>(null);
   const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false);
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [batchSystem, setBatchSystem] = useState("");
 
   // 获取分类数据
@@ -118,7 +120,10 @@ export default function PhotoReviewPage() {
 
   // 添加创建分类弹窗
   const handleCreateCategory = async () => {
-    if (!newCategory.system || !newCategory.name) return;
+    if (!newCategory.system || !newCategory.name) {
+      alert("请填写分类信息");
+      return;
+    }
 
     try {
       await createCategory({
@@ -128,8 +133,11 @@ export default function PhotoReviewPage() {
       });
       await fetchCategories();
       setNewCategory({ system: "", name: "" });
+      setCategoryDialogOpen(false);
+      toast.success("创建分类成功");
     } catch (error) {
       console.error("创建分类失败:", error);
+      toast.error(`创建分类失败${error}`);
     }
   };
 
@@ -161,7 +169,7 @@ export default function PhotoReviewPage() {
 
     try {
       setLoading(true);
-      await batchReviewPass({ photos: photosToApprove });
+      await batchReviewPass(photosToApprove);
       setSelectedIds([]);
       setIsBatchDialogOpen(false);
       await fetchPhotos();
@@ -205,9 +213,7 @@ export default function PhotoReviewPage() {
           return;
         }
 
-        await batchReviewPass({
-          photos: [{ id, categoryId }],
-        });
+        await batchReviewPass([{ id, categoryId }]);
         await fetchPhotos();
       } catch (error) {
         console.error("通过失败:", error);
@@ -256,7 +262,10 @@ export default function PhotoReviewPage() {
               批量拒绝
             </Button>
           </div>
-          <Dialog>
+          <Dialog
+            open={categoryDialogOpen}
+            onOpenChange={setCategoryDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="ml-4">新建二级分类</Button>
             </DialogTrigger>
@@ -448,7 +457,7 @@ export default function PhotoReviewPage() {
 
             {batchMode === "new" && (
               <div className="grid gap-4">
-                <Select onValueChange={(system) => setBatchCategory(null)}>
+                <Select onValueChange={(system) => setBatchSystem(system)}>
                   <SelectTrigger>
                     <SelectValue placeholder="选择一级分类" />
                   </SelectTrigger>
