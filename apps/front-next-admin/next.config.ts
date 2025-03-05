@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
+import { basePath } from "./env";
 
 const nextConfig: NextConfig = {
   /* config options here */
-
+  basePath,
   rewrites: async () => {
     return [
       // {

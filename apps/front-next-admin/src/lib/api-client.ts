@@ -1,3 +1,4 @@
+import { basePath } from "../../env";
 // 创建一个通用的fetch函数，处理认证和错误
 export async function apiFetch(url: string, options: RequestInit = {}) {
   const API_BASE_URL =
@@ -13,7 +14,7 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
 
     // 处理401未授权错误
     if (response.status === 401) {
-      window.location.href = "/login";
+      window.location.href = basePath + "/login";
       return null;
     }
 
