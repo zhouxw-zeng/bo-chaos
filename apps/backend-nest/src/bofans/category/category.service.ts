@@ -15,9 +15,6 @@ export class CategoryService {
       });
     }
     return this.prisma.category.findMany({
-      where: {
-        published: true,
-      },
       orderBy: {
         updatedAt: 'desc',
       },

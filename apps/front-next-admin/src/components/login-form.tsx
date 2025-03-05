@@ -31,7 +31,6 @@ export function LoginForm({
       setError("");
 
       const response = await login({ account, password });
-
       if (response === true) {
         // 登录成功，跳转到审核页面
         router.push("/bofans_admin/review");
@@ -39,8 +38,9 @@ export function LoginForm({
         setError("账号或密码错误");
       }
     } catch (error) {
-      console.error("登录失败:", error);
-      setError("登录失败，请稍后再试");
+      setError(
+        (error as { message: string })?.message || "登录失败，请稍后再试",
+      );
     } finally {
       setLoading(false);
     }

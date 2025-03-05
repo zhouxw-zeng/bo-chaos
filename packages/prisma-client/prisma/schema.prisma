@@ -36,7 +36,6 @@ model Category {
   secondCategory String @default("default")
   author    User?    @relation(fields: [authorOpenId], references: [openId], name: "UserCategories")
   authorOpenId  String
-  published Boolean? @default(false)
   updatedAt DateTime @updatedAt
   photos    Photo[]
   @@unique([name, secondCategory])
@@ -50,7 +49,7 @@ model Photo {
   viewedTimes    Int      @default(0)
   category  Category @relation(fields: [categoryId], references: [id])
   categoryId Int
-  published Boolean? @default(false)
+  status String @default("reviewing")
   author    User?    @relation(fields: [authorOpenId], references: [openId])
   authorOpenId  String?
   votes     PhotoVote[]

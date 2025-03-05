@@ -7,13 +7,15 @@ export async function getReviewList(): Promise<Photo[]> {
   return await response.json();
 }
 
-export async function batchReviewPass(ids: number[]): Promise<void> {
+export async function batchReviewPass(
+  photos: { id: number; categoryId: number }[][],
+): Promise<void> {
   await apiFetch("/photo/batchReviewPass", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ ids }),
+    body: JSON.stringify({ photos }),
   });
 }
 

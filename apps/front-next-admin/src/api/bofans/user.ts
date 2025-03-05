@@ -18,10 +18,12 @@ export async function login(data: {
     },
     body: JSON.stringify(data),
     credentials: "include", // 确保Cookie能够被设置
-  }).then((res) => {
+  }).then(async (res) => {
     if (res.ok) {
       return res.json();
     }
-    throw new Error("登录失败");
+
+    const body = await res.json();
+    throw new Error(body?.message || "登录失败");
   });
 }

@@ -22,6 +22,7 @@ import { PhotoService } from './photo.service';
 import { CategoryService } from '../category/category.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Photo, PhotoVote } from '@mono/prisma-client';
+import { bofans } from '@mono/const';
 
 @UseGuards(AuthGuard)
 @Controller('bofans/photo')
@@ -44,7 +45,7 @@ export class PhotoController {
         category: {
           system,
         },
-        published: true,
+        status: bofans.PHOTO_STATUS.PASSED,
       },
       include: {
         category: true,
@@ -85,7 +86,7 @@ export class PhotoController {
     const openId = req.user.openId;
     const photo = (await this.photoService.photo({
       where: {
-        published: true,
+        status: bofans.PHOTO_STATUS.PASSED,
         id: +id,
       },
       include: {
@@ -270,7 +271,7 @@ export class PhotoController {
         filename: `${env.PHOTO_OSS_HOST}/bofans_static/photo/${filename}`,
         category: { connect: { id: categoryId } },
         author: { connect: { openId } },
-        published: false, // 默认未发布，需要审核
+        status: bofans.PHOTO_STATUS.REVIEWING, // 默认未发布，需要审核
       });
 
       return {
@@ -286,24 +287,54 @@ export class PhotoController {
   @Get('myUploaded')
   async myUploaded(@Request() req: { user: { openId: string } }) {
     const openId = req.user.openId;
-    return this.photoService.photos({
+    const photos = await this.photoService.photos({
       where: {
         authorOpenId: openId,
+        status: {
+          not: bofans.PHOTO_STATUS.REJECTED,
+        },
       },
     });
+
+    return photos.map((p) => ({
+      ...p,
+      published: p.status === bofans.PHOTO_STATUS.PASSED,
+    }));
   }
 
   @Get('reviewList')
   async reviewList() {
     return this.photoService.photos({
       where: {
-        published: false,
+        status: bofans.PHOTO_STATUS.REVIEWING,
       },
     });
   }
 
   @Post('batchReviewPass')
-  async batchReviewPass(@Body() photoDto: { ids: number[] }) {
+  async batchReviewPass(
+    @Body() photoDto: { photos: { id: number; categoryId: number }[] },
+  ) {
+    const { photos } = photoDto;
+
+    // 使用Promise.all处理多个照片的更新
+    const updatePromises = photos.map(async (photo) => {
+      return this.photoService.updatePhoto({
+        where: { id: photo.id },
+        data: {
+          status: bofans.PHOTO_STATUS.PASSED,
+          category: {
+            connect: { id: photo.categoryId },
+          },
+        },
+      });
+    });
+
+    return Promise.all(updatePromises);
+  }
+
+  @Post('batchReviewReject')
+  async batchReviewReject(@Body() photoDto: { ids: number[] }) {
     return this.photoService.updatePhotos({
       where: {
         id: {
@@ -311,16 +342,7 @@ export class PhotoController {
         },
       },
       data: {
-        published: true,
-      },
-    });
-  }
-
-  @Post('batchReviewReject')
-  async batchReviewReject(@Body() photoDto: { ids: number[] }) {
-    return this.photoService.deletePhotos({
-      id: {
-        in: photoDto.ids,
+        status: bofans.PHOTO_STATUS.REJECTED,
       },
     });
   }

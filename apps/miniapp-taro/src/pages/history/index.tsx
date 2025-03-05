@@ -16,7 +16,7 @@ export interface PhotoDataType {
   description: string;
   viewedTimes: number;
   categoryId: number;
-  published: boolean;
+  status: string;
   authorOpenId: string;
   category: Category;
   _count: Count;

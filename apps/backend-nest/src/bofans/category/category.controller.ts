@@ -24,7 +24,9 @@ export class CategoryController {
     },
   ) {
     try {
-      await this.categoryService.createCategory(categoryData);
+      await this.categoryService.createCategory({
+        ...categoryData,
+      });
       return true;
     } catch {
       return false;

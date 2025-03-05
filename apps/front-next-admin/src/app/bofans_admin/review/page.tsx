@@ -1,5 +1,23 @@
 "use client";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useCallback, useEffect, useState } from "react";
 import {
   Table,
@@ -40,19 +58,35 @@ export default function PhotoReviewPage() {
   const [categoryMap, setCategoryMap] = useState<Record<number, CategoryInfo>>(
     {},
   );
+  const [systems, setSystems] = useState<string[]>([]);
+  const [categoryGroups, setCategoryGroups] = useState<
+    Record<string, CategoryInfo[]>
+  >({});
+  const [selectedCategories, setSelectedCategories] = useState<
+    Record<number, number>
+  >({});
+  const [newCategory, setNewCategory] = useState({ system: "", name: "" });
+  const [batchMode, setBatchMode] = useState<"current" | "new">("current");
+  const [batchCategory, setBatchCategory] = useState<number | null>(null);
+  const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false);
+  const [batchSystem, setBatchSystem] = useState("");
 
   // 获取分类数据
   const fetchCategories = useCallback(async () => {
     try {
       const data = await getCategories();
-      const map = data.reduce(
-        (acc, category) => {
-          acc[category.id] = category;
+      const systems = [...new Set(data.map((c) => c.system))];
+      const groups = systems.reduce(
+        (acc, system) => {
+          acc[system] = data.filter((c) => c.system === system);
           return acc;
         },
-        {} as Record<number, CategoryInfo>,
+        {} as Record<string, CategoryInfo[]>,
       );
-      setCategoryMap(map);
+
+      setSystems(systems);
+      setCategoryGroups(groups);
+      setCategoryMap(data.reduce((acc, c) => ({ ...acc, [c.id]: c }), {}));
     } catch (error) {
       console.error("获取分类数据失败:", error);
     }
@@ -82,26 +116,66 @@ export default function PhotoReviewPage() {
     [photos],
   );
 
+  // 添加创建分类弹窗
+  const handleCreateCategory = async () => {
+    if (!newCategory.system || !newCategory.name) return;
+
+    try {
+      await createCategory({
+        system: newCategory.system,
+        secondCategory: newCategory.name,
+        name: newCategory.system, // 假设一级分类名称与system相同
+      });
+      await fetchCategories();
+      setNewCategory({ system: "", name: "" });
+    } catch (error) {
+      console.error("创建分类失败:", error);
+    }
+  };
+
   const handleSelectOne = useCallback((checked: boolean, id: number) => {
     setSelectedIds((prev) =>
       checked ? [...prev, id] : prev.filter((item) => item !== id),
     );
   }, []);
 
-  const handleApprove = useCallback(async () => {
-    if (selectedIds.length === 0) return;
+  const handleBatchApprove = async () => {
+    const photosToApprove = selectedIds
+      .map((id) => {
+        // 处理当前分类模式
+        if (batchMode === "current") {
+          const categoryId =
+            selectedCategories[id] ||
+            photos.find((p) => p.id === id)?.categoryId;
+          return categoryId ? { id, categoryId } : null;
+        }
+        // 处理新分类模式
+        if (batchCategory) {
+          return { id, categoryId: batchCategory };
+        }
+        return null;
+      })
+      .filter((p) => p !== null) as { id: number; categoryId: number }[];
+
+    if (photosToApprove.length === 0) return;
 
     try {
       setLoading(true);
-      await batchReviewPass(selectedIds);
+      await batchReviewPass({ photos: photosToApprove });
       setSelectedIds([]);
+      setIsBatchDialogOpen(false);
       await fetchPhotos();
     } catch (error) {
       console.error("批量通过失败:", error);
     } finally {
       setLoading(false);
     }
-  }, [selectedIds, fetchPhotos]);
+  };
+
+  const handleApprove = useCallback(async () => {
+    if (selectedIds.length === 0) return;
+    setIsBatchDialogOpen(true); // 打开批量审核弹窗
+  }, [selectedIds]);
 
   const handleReject = useCallback(async () => {
     if (selectedIds.length === 0) return;
@@ -123,7 +197,17 @@ export default function PhotoReviewPage() {
     async (id: number) => {
       try {
         setLoading(true);
-        await batchReviewPass([id]);
+        const categoryId =
+          selectedCategories[id] || photos.find((p) => p.id === id)?.categoryId;
+
+        if (!categoryId) {
+          alert("请先选择分类");
+          return;
+        }
+
+        await batchReviewPass({
+          photos: [{ id, categoryId }],
+        });
         await fetchPhotos();
       } catch (error) {
         console.error("通过失败:", error);
@@ -131,7 +215,7 @@ export default function PhotoReviewPage() {
         setLoading(false);
       }
     },
-    [fetchPhotos],
+    [fetchPhotos, selectedCategories, photos],
   );
 
   const handleSingleReject = useCallback(
@@ -155,21 +239,66 @@ export default function PhotoReviewPage() {
         <CardTitle>图片审核</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex justify-end space-x-2">
-          <Button
-            variant="default"
-            onClick={handleApprove}
-            disabled={selectedIds.length === 0 || loading}
-          >
-            批量通过
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleReject}
-            disabled={selectedIds.length === 0 || loading}
-          >
-            批量拒绝
-          </Button>
+        <div className="mb-4 flex justify-between space-x-2">
+          <div className="flex gap-4">
+            <Button
+              variant="default"
+              onClick={handleApprove}
+              disabled={selectedIds.length === 0 || loading}
+            >
+              批量通过
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              disabled={selectedIds.length === 0 || loading}
+            >
+              批量拒绝
+            </Button>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="ml-4">新建二级分类</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>新建二级分类</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label>一级分类</Label>
+                  <Select
+                    onValueChange={(v) =>
+                      setNewCategory((p) => ({ ...p, system: v }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="选择一级分类" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {systems.map((system) => (
+                        <SelectItem key={system} value={system}>
+                          {system}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>二级分类名称</Label>
+                  <Input
+                    value={newCategory.name}
+                    onChange={(e) =>
+                      setNewCategory((p) => ({ ...p, name: e.target.value }))
+                    }
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handleCreateCategory}>创建</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
         <div className="rounded-md border">
           <Table>
@@ -193,7 +322,9 @@ export default function PhotoReviewPage() {
             </TableHeader>
             <TableBody>
               {photos.map((photo) => {
-                const category = categoryMap[photo.categoryId];
+                const currentCategory =
+                  categoryMap[selectedCategories[photo.id] || photo.categoryId];
+
                 return (
                   <TableRow key={photo.id}>
                     <TableCell>
@@ -208,13 +339,55 @@ export default function PhotoReviewPage() {
                     <TableCell>
                       <img
                         src={photo.filename}
-                        alt="预览图"
+                        alt={photo.name || "预览图"}
                         className="h-20 w-20 object-cover"
                       />
                     </TableCell>
-                    <TableCell>{category?.name || "未知分类"}</TableCell>
                     <TableCell>
-                      {category?.secondCategory || "未知分类"}
+                      <Select
+                        value={currentCategory?.system || ""}
+                        onValueChange={(system) =>
+                          setSelectedCategories((prev) => ({
+                            ...prev,
+                            [photo.id]: categoryGroups[system]?.[0]?.id || 0,
+                          }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择一级分类" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {systems.map((system) => (
+                            <SelectItem key={system} value={system}>
+                              {system}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={currentCategory?.id?.toString() || ""}
+                        onValueChange={(id) =>
+                          setSelectedCategories((prev) => ({
+                            ...prev,
+                            [photo.id]: parseInt(id),
+                          }))
+                        }
+                        disabled={!currentCategory?.system}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择二级分类" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {currentCategory?.system &&
+                            categoryGroups[currentCategory.system]?.map((c) => (
+                              <SelectItem key={c.id} value={c.id.toString()}>
+                                {c.secondCategory}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>{photo.authorOpenId}</TableCell>
                     <TableCell>
@@ -252,6 +425,66 @@ export default function PhotoReviewPage() {
           </Table>
         </div>
       </CardContent>
+
+      <Dialog open={isBatchDialogOpen} onOpenChange={setIsBatchDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>批量审核设置</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <RadioGroup
+              value={batchMode}
+              onValueChange={(v) => setBatchMode(v as any)}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="current" id="r1" />
+                <Label htmlFor="r1">使用当前分类</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="new" id="r2" />
+                <Label htmlFor="r2">统一修改分类</Label>
+              </div>
+            </RadioGroup>
+
+            {batchMode === "new" && (
+              <div className="grid gap-4">
+                <Select onValueChange={(system) => setBatchCategory(null)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="选择一级分类" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {systems.map((system) => (
+                      <SelectItem key={system} value={system}>
+                        {system}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={batchCategory?.toString() || ""}
+                  onValueChange={(v) => setBatchCategory(parseInt(v))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="选择二级分类" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {batchSystem &&
+                      categoryGroups[batchSystem]?.map((c) => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {c.secondCategory}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleBatchApprove}>确认通过</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
