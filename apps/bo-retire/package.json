@@ -1,0 +1,67 @@
+{
+  "name": "bo-retire",
+  "displayName": "bo-retire",
+  "publisher": "zhangyiming",
+  "icon": "images/icon.png",
+  "description": "bo retire countdown",
+  "repository": "https://github.com/sosohime/bo-chaos/apps/bo-retire",
+  "version": "0.0.3",
+  "engines": {
+    "vscode": "^1.98.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "bo-retire.duojiutuixiu",
+        "title": "Duo jiu tui xiu"
+      },
+      {
+        "command": "bo-retire.hidetuixiu",
+        "title": "Hide tui xiu status bar"
+      },
+      {
+        "command": "bo-retire.showtuixiu",
+        "title": "Show tui xiu status bar"
+      },
+      {
+        "command": "bo-retire.gotuixiu",
+        "title": "Go to tui xiu website"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "publish": "vsce publish --no-dependencies",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "dependencies": {
+    "@mono/const": "workspace:*",
+    "@mono/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.98.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "eslint": "^9.21.0",
+    "typescript": "^5.7.3",
+    "ts-loader": "^9.5.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}
