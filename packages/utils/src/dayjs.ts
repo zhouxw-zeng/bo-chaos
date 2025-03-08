@@ -1,3 +1,4 @@
+// FIXME: 构建后声明文件未包含dayjs，需要更新dayjs 2x版本（当前alpha）
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import durationPlugin from "dayjs/plugin/duration";
