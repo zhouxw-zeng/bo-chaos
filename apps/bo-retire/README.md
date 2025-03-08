@@ -1,71 +1,35 @@
-# bo-retire README
+# bo-retire
 
-This is the README for your extension "bo-retire". After writing up a brief description, we recommend including the following sections.
+博之退休倒计时
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+`command` + `shift` + `p`, 输入 `tuixiu`
 
-For example if there is an image subfolder under your extension project workspace:
+支持以下命令
+![commands](./images/commands.jpg)
 
-\!\[feature X\]\(images/feature-x.png\)
+### 状态栏倒计时
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+开启：`Show tui xiu status bar`
+![commands](./images/statusbar.jpg)
 
-## Requirements
+关闭：`Hide tui xiu status bar`
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### 一次性提示
 
-## Extension Settings
+`Duo jiu tui xiu`
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+![commands](./images/duojiu.jpg)
 
-For example:
+### 前往博之退休官方网站
 
-This extension contributes the following settings:
+`Go to tui xiu website`
 
-- `myExtension.enable`: Enable/disable this extension.
-- `myExtension.thing`: Set to `blah` to do something.
+![commands](./images/website.jpg)
 
-## Known Issues
+### 0.0.1
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-- Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-- Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- 支持状态栏展示
+- 支持一次性提示
+- 支持网站跳转

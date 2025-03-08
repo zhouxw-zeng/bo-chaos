@@ -1,8 +1,11 @@
 {
   "name": "bo-retire",
   "displayName": "bo-retire",
+  "publisher": "zhangyiming",
+  "icon": "images/icon.png",
   "description": "bo retire countdown",
-  "version": "0.0.1",
+  "repository": "https://github.com/sosohime/bo-chaos/apps/bo-retire",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -14,8 +17,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "bo-retire.helloWorld",
-        "title": "Hello World"
+        "command": "bo-retire.duojiutuixiu",
+        "title": "Duo jiu tui xiu"
+      },
+      {
+        "command": "bo-retire.hidetuixiu",
+        "title": "Hide tui xiu status bar"
+      },
+      {
+        "command": "bo-retire.showtuixiu",
+        "title": "Show tui xiu status bar"
+      },
+      {
+        "command": "bo-retire.gotuixiu",
+        "title": "Go to tui xiu website"
       }
     ]
   },
@@ -24,6 +39,7 @@
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
+    "publish": "vsce publish --no-dependencies",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
