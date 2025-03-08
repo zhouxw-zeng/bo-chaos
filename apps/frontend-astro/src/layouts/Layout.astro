@@ -32,7 +32,8 @@ import background from '../assets/background.svg';
     <title>{Astro.props.title}</title>
   </head>
   <body>
-    <img id="background" src={background.src} alt="" fetchpriority="high" />
+    <div id="background" style={`background-image: url(${background.src});`}>
+    </div>
     <slot />
   </body>
 </html>
