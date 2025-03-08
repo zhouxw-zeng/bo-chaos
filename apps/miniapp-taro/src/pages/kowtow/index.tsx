@@ -1,12 +1,14 @@
 import { View, Button, Image, Text, Canvas } from "@tarojs/components";
 import { useState, useEffect, useRef, useContext } from "react";
 import Taro from "@tarojs/taro";
+import { eventHandle } from "@mono/const";
 import BoSheng from "@/components/boSheng";
 import { AppContext } from "@/lib/context";
 import { useShare } from "@/lib/share";
 import { getKowtowStats, kowtowOnce } from "../../api/kowtow";
 import "./index.scss";
 import God from "../../images/god.png";
+const { throttle } = eventHandle;
 
 export default function Kowtow() {
   const { systemConfig } = useContext(AppContext);
@@ -41,6 +43,22 @@ export default function Kowtow() {
   }, []);
 
   const animationQueue = useRef<number[]>([]);
+  // 点赞图标库
+  const godIcon = [
+    "🌼",
+    "👍",
+    "🌹",
+    "🚀",
+    "⭐",
+    "😻",
+    "🦄",
+    "🥳",
+    "🧸",
+    "🧨",
+    "❤️",
+    "💕",
+    "🍔",
+  ];
 
   useEffect(() => {
     // 初始化 canvas context
@@ -60,6 +78,7 @@ export default function Kowtow() {
 
   // 创建点赞动画
   const createLikeAnimation = () => {
+    let currentNumber = Math.floor(Math.random() * 12);
     const query = Taro.createSelectorQuery();
     query
       .select("#god-bo-canvas")
@@ -91,7 +110,7 @@ export default function Kowtow() {
             ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
             ctx.textAlign = "center";
             ctx.scale(4, 1);
-            ctx.fillText("👍", startX, y);
+            ctx.fillText(godIcon[currentNumber], startX, y);
             ctx.restore();
 
             requestAnimationFrame(animate);
@@ -149,7 +168,7 @@ export default function Kowtow() {
           <Button
             className="submit-kowtow"
             type="primary"
-            onClick={handleKowtow}
+            onClick={throttle(handleKowtow, 260, true)}
           >
             磕
           </Button>
