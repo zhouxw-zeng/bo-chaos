@@ -1,9 +1,7 @@
 import React from 'react';
-import { useTuixiuCountDown, getCountDown } from '../../hooks/countDown';
+import { useTuixiuCountDown, getCountDown } from '../../../hooks/countDown';
 import { tuixiu } from '@mono/const';
-import CopyToClipboardButton from '../copyToClipboard';
-import { ArrowUpRight, ArrowRightLeft } from 'lucide-react';
-import { buttonVariants } from '@mono/ui/button';
+import CopyToClipboardButton from '../../copyToClipboard';
 
 const { reckfulTuiXiuDay, reckfulChangQiFuWu } = tuixiu;
 
@@ -17,8 +15,7 @@ export default function Tuixiu() {
   }, []);
 
   return (
-    <div className="text-center h-full w-full flex flex-col justify-center items-center">
-      <h1 className="text-2xl pb-4">距离Reckful退休还有</h1>
+    <>
       <p className="text-4xl pb-4">
         {countDown?.['yyyyMMDD hhmmss']}
         <span className="text-xl pl-1">{countDown?.milliseconds}</span>
@@ -33,22 +30,6 @@ export default function Tuixiu() {
       <div className="pb-4">
         <CopyToClipboardButton text={getTuiClipboardText} />
       </div>
-
-      <div>
-        <a
-          className={buttonVariants({ variant: 'link' })}
-          href="https://rocom.qq.com/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          充值加速退休进度
-          <ArrowUpRight />
-        </a>
-        <a className={buttonVariants({ variant: 'link' })} href="../bo">
-          切换科兴双子
-          <ArrowRightLeft />
-        </a>
-      </div>
-    </div>
+    </>
   );
 }

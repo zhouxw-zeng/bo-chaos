@@ -1,12 +1,15 @@
 ---
 import '@mono/config-tailwind/global.css';
 import Layout from '../layouts/Layout.astro';
-import Tuixiu from '../components/tuixiu/bo.tsx';
+import Tuixiu from '../components/tuixiu/bo/index.tsx';
+import TuixiuDynamic from '../components/tuixiu/bo/dynamic.tsx';
 ---
 
 <Layout
   title="博退倒计时 - 袁博退休倒计时"
   description="距离腾讯云核心产品经理袁博（boyuan）退休还有多少时间？腾讯云lighthouse和DNSPod又该何去何从，让我们拭目以待。"
 >
-  <Tuixiu client:only="react" />
+  <Tuixiu>
+    <TuixiuDynamic client:only="react" />
+  </Tuixiu>
 </Layout>

@@ -2,11 +2,14 @@
 import '@mono/config-tailwind/global.css';
 import Layout from '../layouts/Layout.astro';
 import Tuixiu from '../components/tuixiu/reckful';
+import Dynamic from '../components/tuixiu/reckful/dynamaic';
 ---
 
 <Layout
   title="Reckful退休倒计时 - 张哥退休倒计时"
   description="Reckful reckful reckful reckzhang 洛克王国 洛克王国世界 魔方 腾讯 退休"
 >
-  <Tuixiu client:only="react" />
+  <Tuixiu>
+    <Dynamic client:only="react" />
+  </Tuixiu>
 </Layout>
