@@ -578,11 +578,7 @@ importers:
         specifier: workspace:*
         version: link:../config-tailwind
 
-  packages/utils:
-    dependencies:
-      dayjs:
-        specifier: ^1.11.13
-        version: 1.11.13
+  packages/utils: {}
 
 packages:
 
