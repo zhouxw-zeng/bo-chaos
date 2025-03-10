@@ -34,17 +34,17 @@ astro退休倒计时
   - [ ] Baidu
 - [x] VSCode插件: [bo-retire](https://marketplace.visualstudio.com/items?itemName=zhangyiming.bo-retire)
   - [x] 状态栏显示倒计时、跳转、一次性提示
-  - [ ] 自定义计时（高级功能）
+  - [ ] 自定义计时
 
 后端
 
-- [ ] 图片上传增加尺寸识别
-  - [ ] 识别尺寸加入文件名中，用于瀑布流布局
-  - [ ] 提供脚本批量处理存量图片（改图片名+更新DB）
+- [x] 图片上传增加尺寸识别
+  - [x] 识别尺寸加入文件名中，用于瀑布流布局
+  - [x] 提供脚本批量处理存量图片（改图片名+更新DB）
 - [ ] 增加图片上传进度
 - [x] 管理后台登录（WIP）
 - [x] 增加拒审功能
-  - [x] 当前素材published为boolean，需要改为字符串枚举（reviewing、passed、rejected）
+  - [x] 素材状态更新为reviewing、passed、rejected
 
 管理端
 
