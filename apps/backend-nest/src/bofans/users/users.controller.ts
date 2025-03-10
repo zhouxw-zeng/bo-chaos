@@ -16,7 +16,7 @@ import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import * as FormData from 'form-data';
-import sharp from 'sharp';
+import * as sharp from 'sharp';
 import axios from 'axios';
 import { env } from '@/const/env';
 import { UsersService } from './users.service';
