@@ -15,6 +15,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import * as FormData from 'form-data';
+import sharp from 'sharp';
 import axios from 'axios';
 import { env } from '@/const/env';
 import { UsersService } from '../users/users.service';
@@ -23,6 +24,7 @@ import { CategoryService } from '../category/category.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Photo, PhotoVote } from '@mono/prisma-client';
 import { bofans } from '@mono/const';
+import { photo as photoUtils } from '@mono/utils';
 
 @UseGuards(AuthGuard)
 @Controller('bofans/photo')
@@ -242,9 +244,19 @@ export class PhotoController {
 
       // 上传图片到oss_service
       const formData = new FormData();
-      const filename = `photo_${openId}_${Date.now()}${file.originalname.substring(
-        file.originalname.lastIndexOf('.'),
-      )}`;
+      // 获取图片宽高
+      const imgMetadata = await sharp(file.buffer).metadata();
+
+      if (!imgMetadata.height || !imgMetadata.width) {
+        throw new Error('Image Read Failed, Get Image Size Error');
+      }
+      const filename = photoUtils.genStandardPictureName({
+        category: 'photo',
+        user: openId,
+        ext: file.originalname.substring(file.originalname.lastIndexOf('.')),
+        height: imgMetadata.height,
+        width: imgMetadata.width,
+      });
 
       formData.append('file', file.buffer, filename);
       formData.append('path', 'bofans/photo');

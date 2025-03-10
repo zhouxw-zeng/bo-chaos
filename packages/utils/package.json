@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "keywords": [],
   "description": "",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "main": "./dist/index.js",
   "module": "./dist/index.esm.js",
   "scripts": {

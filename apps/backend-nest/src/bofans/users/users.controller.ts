@@ -16,10 +16,12 @@ import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import * as FormData from 'form-data';
+import sharp from 'sharp';
 import axios from 'axios';
 import { env } from '@/const/env';
 import { UsersService } from './users.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { photo as photoUtils } from '@mono/utils';
 
 @Controller('bofans/users')
 export class UsersController {
@@ -96,7 +98,20 @@ export class UsersController {
       const originalExtension = file.originalname
         ? getFileExtension(file.originalname)
         : '.png';
-      const filename = `avatar_${openId}_${Date.now()}${originalExtension}`;
+
+      // 获取图片宽高
+      const imgMetadata = await sharp(file.buffer).metadata();
+
+      if (!imgMetadata.height || !imgMetadata.width) {
+        throw new Error('Image Read Failed, Get Image Size Error');
+      }
+      const filename = photoUtils.genStandardPictureName({
+        category: 'avatar',
+        user: openId,
+        ext: originalExtension,
+        height: imgMetadata.height,
+        width: imgMetadata.width,
+      });
 
       formData.append('file', file.buffer, filename);
       formData.append('path', 'bofans/avatars');
