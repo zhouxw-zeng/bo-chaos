@@ -21,7 +21,8 @@ export function genStandardPictureName({
   );
 }
 
-export function getStandardPictureInfo(filename: string) {
+export function getStandardPictureInfo(fileLink: string) {
+  const filename = fileLink.split("/").pop() || "";
   const [name, ext] = filename.split(".");
   const infos = name.split(".").shift()?.split("_") || [];
   const [category, user, uploadTime, size] = infos;
