@@ -25,22 +25,18 @@ export function getStandardPictureInfo(fileLink: string) {
   const filename = fileLink.split("/").pop() || "";
   const [name, ext] = filename.split(".");
   const infos = name.split(".").shift()?.split("_") || [];
-  const [category, user, uploadTime, size] = infos;
-  if ([category, user, uploadTime, size, ext].some(isNil)) {
+  const [category, user, uploadTime, size = ""] = infos;
+  if ([category, user, uploadTime, ext].some(isNil)) {
     return;
   }
   const [width, height] = size.split("x").map(Number);
-
-  if ([width, height].some((n) => Number.isNaN(n))) {
-    return;
-  }
 
   return {
     ext,
     category,
     user,
     uploadTime,
-    width: width,
-    height: height,
+    width: width || 0,
+    height: height || 0,
   };
 }

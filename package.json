@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "update_lock": "pnpm install --no-frozen-lockfile",
     "prepare": "husky",
     "start:nest": "pnpm -C apps/backend-nest start",
     "start:astro": "pnpm -C apps/frontend-astro dev",
@@ -11,7 +12,7 @@
     "start:admin": "pnpm -C apps/front-next-admin dev",
     "build": "pnpm -r --filter=./packages/* prod",
     "build:astro": "pnpm -C apps/frontend-astro build",
-    "test": "echo \"Error: no test specified\"",
+    "test": "pnpm -r --filter=./packages/* test",
     "commit": "commit",
     "commitlint": "commitlint --edit"
   },
@@ -56,6 +57,7 @@
     "rimraf": "^6.0.1",
     "rollup": "^4.34.8",
     "rollup-plugin-node-externals": "^8.0.0",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "vitest": "^3.0.8"
   }
 }
