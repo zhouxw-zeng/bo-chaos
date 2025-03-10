@@ -24,20 +24,13 @@ function getCountDown(tuixiu: dayjs.Dayjs): string {
 }
 
 const { boTuiXiuDay } = tuixiu;
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 
 let myStatusBarItem: vscode.StatusBarItem;
 let timer: NodeJS.Timeout | null = null;
 
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "bo-retire" is now active!');
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
   const duojiutuixiuCommand = vscode.commands.registerCommand(
     "bo-retire.duojiutuixiu",
     () => {
@@ -50,16 +43,45 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(duojiutuixiuCommand);
 
+  const showTuixiuStatusBarState = "bo-retire.showStatusBar";
+  const SHOW_STATUS_BAR_STATE_ENUM = {
+    show: "show",
+    hide: "hide",
+  };
+  context.globalState.setKeysForSync([showTuixiuStatusBarState]);
+  console.log("ok", context.globalState.get(showTuixiuStatusBarState));
+
+  if (
+    context.globalState.get(showTuixiuStatusBarState) ===
+    SHOW_STATUS_BAR_STATE_ENUM.show
+  ) {
+    if (!timer) {
+      timer = setInterval(() => {
+        updateStatusBarItem();
+      }, 1000);
+    }
+  }
+
   const showTuixiuCommand = "bo-retire.showtuixiu";
   const showTuixiu = vscode.commands.registerCommand(showTuixiuCommand, () => {
-    timer = setInterval(() => {
-      updateStatusBarItem();
-    }, 1000);
+    context.globalState.update(
+      showTuixiuStatusBarState,
+      SHOW_STATUS_BAR_STATE_ENUM.show,
+    );
+    if (!timer) {
+      timer = setInterval(() => {
+        updateStatusBarItem();
+      }, 1000);
+    }
   });
   context.subscriptions.push(showTuixiu);
 
   const hideTuixiuCommand = "bo-retire.hidetuixiu";
   const hideTuixiu = vscode.commands.registerCommand(hideTuixiuCommand, () => {
+    context.globalState.update(
+      showTuixiuStatusBarState,
+      SHOW_STATUS_BAR_STATE_ENUM.hide,
+    );
     myStatusBarItem.hide();
     timer && clearInterval(timer);
   });
