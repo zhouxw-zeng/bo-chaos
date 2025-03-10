@@ -31,7 +31,7 @@ async function main() {
   // 过滤出非标准文件名的
   const reGenList = photos.filter((p) => {
     const info = photoUtils.getStandardPictureInfo(p.filename);
-    return !info;
+    return !info?.height || !info?.width;
   });
 
   console.log(`需要处理的图片数量: ${reGenList.length}`);
