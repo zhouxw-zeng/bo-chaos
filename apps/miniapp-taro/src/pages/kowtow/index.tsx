@@ -1,14 +1,13 @@
 import { View, Button, Image, Text, Canvas } from "@tarojs/components";
 import { useState, useEffect, useRef, useContext } from "react";
 import Taro from "@tarojs/taro";
-import { eventHandle } from "@mono/const";
+import { throttle } from "es-toolkit";
 import BoSheng from "@/components/boSheng";
 import { AppContext } from "@/lib/context";
 import { useShare } from "@/lib/share";
 import { getKowtowStats, kowtowOnce } from "../../api/kowtow";
 import "./index.scss";
 import God from "../../images/god.png";
-const { throttle } = eventHandle;
 
 export default function Kowtow() {
   const { systemConfig } = useContext(AppContext);
@@ -168,7 +167,7 @@ export default function Kowtow() {
           <Button
             className="submit-kowtow"
             type="primary"
-            onClick={throttle(handleKowtow, 260, true)}
+            onClick={throttle(handleKowtow, 260)}
           >
             磕
           </Button>
