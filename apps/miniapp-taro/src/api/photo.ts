@@ -27,13 +27,16 @@ export function cancelPhotoVote(photoId: number) {
   });
 }
 
-export function uploadPhoto(params: {
-  name: string;
-  system: string;
-  categoryId?: number;
-  newCategory?: string;
-  filePath: string;
-}) {
+export function uploadPhoto(
+  params: {
+    name: string;
+    system: string;
+    categoryId?: number;
+    newCategory?: string;
+    filePath: string;
+  },
+  processHandle?: (number) => void,
+) {
   const { filePath, ...rest } = params;
   if (rest.categoryId === 0) {
     delete rest.categoryId;
@@ -41,7 +44,7 @@ export function uploadPhoto(params: {
   return new Promise((res, rej) => {
     try {
       const token = Taro.getStorageSync("token");
-      Taro.uploadFile({
+      const task = Taro.uploadFile({
         url: `${BASE_URL}/photo/upload_photo`, // 上传接口地址
         header: {
           Authorization: token ? `Bearer ${token}` : "",
@@ -60,6 +63,11 @@ export function uploadPhoto(params: {
           rej(error);
         },
       });
+      if (processHandle) {
+        task.onProgressUpdate((res) => {
+          processHandle(res.progress);
+        });
+      }
     } catch (e) {
       console.log(e);
       rej(e);

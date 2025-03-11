@@ -235,7 +235,15 @@ export default function My() {
 
   // 添加新的状态
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<Record<number, boolean>>({});
+  const [uploadStatus, setUploadStatus] = useState<
+    Record<
+      number,
+      {
+        process: number;
+        status: "waiting" | "uploading" | "finish" | "error";
+      }
+    >
+  >({});
 
   const handleSubmit = async () => {
     if (
@@ -258,12 +266,28 @@ export default function My() {
       }));
 
       const results = await Promise.allSettled(
-        tasks.map((data, index) =>
-          uploadPhoto(data).then(() => {
-            setUploadStatus((prev) => ({ ...prev, [index]: true }));
+        tasks.map((data, index) => {
+          setUploadStatus((prev) => ({
+            ...prev,
+            [index]: {
+              process: 0,
+              status: "uploading",
+            },
+          }));
+
+          return uploadPhoto(data, (process) => {
+            setUploadStatus((prev) => ({
+              ...prev,
+              [index]: { ...prev[index], process },
+            }));
+          }).then(() => {
+            setUploadStatus((prev) => ({
+              ...prev,
+              [index]: { ...prev[index], status: "finish" },
+            }));
             return index;
-          }),
-        ),
+          });
+        }),
       );
 
       const successCount = results.filter(
@@ -465,7 +489,22 @@ export default function My() {
                       mode="aspectFit"
                       className="preview-image"
                     />
-                    {uploadStatus[index] && (
+                    {uploadStatus[index]?.status === "uploading" && (
+                      <View className="upload-process">
+                        <View className="circle-progress">
+                          <View
+                            className="progress-value"
+                            style={{
+                              background: `conic-gradient(#4CAF50 ${uploadStatus[index].process * 3.6}deg, rgba(255, 255, 255, 0.3) 0deg)`,
+                            }}
+                          />
+                          <View className="progress-text">
+                            {Math.round(uploadStatus[index].process)}%
+                          </View>
+                        </View>
+                      </View>
+                    )}
+                    {uploadStatus[index]?.status === "finish" && (
                       <View className="upload-success">✓</View>
                     )}
                     {!isSubmitting && (
