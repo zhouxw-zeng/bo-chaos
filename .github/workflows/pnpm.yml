@@ -37,6 +37,8 @@ jobs:
       run: pnpm run build
 
     - name: build astro
+      env:
+        ASTRO_SENTRY_AUTH_TOKEN: ${{ secrets.ASTRO_SENTRY_AUTH_TOKEN }}
       run: pnpm run build:astro
 
           # 添加打包步骤
