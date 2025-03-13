@@ -1,0 +1,35 @@
+.tab-head {
+  width: 100%;
+  height: auto;
+  background: white;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  box-sizing: border-box;
+  font-size: 12px;
+  border-bottom: 1px solid #787878;
+  box-shadow: inset;
+  .current-tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #59b9a8;
+    color: white;
+  }
+  .default-tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: 1px 1px 2px 0px #e2e2e2;;
+  }
+  .icon-block {
+    width: 36px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .head-icon {
+      width: 22px;
+      height: 22px;
+    }
+  }
+}

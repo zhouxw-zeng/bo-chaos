@@ -6,6 +6,7 @@ export default defineAppConfig({
     "pages/travel/index",
     "pages/tease/index",
     "pages/my/index",
+    "pages/approve/index",
   ],
   window: {
     backgroundTextStyle: "light",
