@@ -46,29 +46,30 @@ const DefautTab = ({ approval }: { approval: ApprovalMenu }): ReactNode => {
   const approvalState = useContext(approveContext);
   const currentState = approvalState === approval.value;
   return (
-    <>
-      <View className={currentState ? "current-tab" : "default-tab"}>
-        <View className="icon-block">
-          <Image
-            src={currentState ? approval.currentIcon : approval.icon}
-            className="head-icon"
-          />
-        </View>
-        <View className={currentState ? "current-title" : "default-title"}>
-          {approval.label}
-        </View>
-
-        <View className="tool">
-          <View className="approve-num">{mockApprove[approval.value]}</View>
-          <View className="pageNum">当前页码：0</View>
-        </View>
+    <View
+      className={`${currentState ? "current-tab" : "default-tab"} tab-block`}
+    >
+      <View className="icon-block">
+        <Image
+          src={currentState ? approval.currentIcon : approval.icon}
+          className="head-icon"
+        />
       </View>
-    </>
+      <View
+        className={`${currentState ? "current-title" : "default-title"} tab-title`}
+      >
+        {approval.label}
+      </View>
+      <View className="tool">
+        <View className="approve-num">{mockApprove[approval.value]}</View>
+        {/* <View className="pageNum">当前页码：0</View> */}
+      </View>
+    </View>
   );
 };
 
 interface TabHeadComponent {
-  onClick: () => void;
+  onClick: (value: string) => void;
 }
 const TabHead = ({ onClick }: TabHeadComponent): ReactNode => {
   return (
@@ -76,7 +77,7 @@ const TabHead = ({ onClick }: TabHeadComponent): ReactNode => {
       <View className="tab-head">
         {approveMenu.map((approval: ApprovalMenu, index: number) => {
           return (
-            <div key={index} onClick={onClick}>
+            <div key={index} onClick={() => onClick(approval.value)}>
               {<DefautTab approval={approval} />}
             </div>
           );
