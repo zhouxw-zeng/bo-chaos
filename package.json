@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "pnpm run build",
     "update_lock": "pnpm install --no-frozen-lockfile",
     "prepare": "husky",
     "start:nest": "pnpm -C apps/backend-nest start",
