@@ -183,6 +183,13 @@ export default function My() {
     }
   };
 
+  const navToApprove = (approval: any): void => {
+    console.log("1323");
+    Taro.navigateTo({
+      url: `/pages/approve/index?approval=${approval}`, // 携带参数
+    });
+  };
+
   const handleNameChange = async () => {
     try {
       await updateNickname(editingName);
@@ -527,7 +534,9 @@ export default function My() {
       </View>
 
       <View className="history-section">
-        <View className="section-title">审核中</View>
+        <View className="section-title" onClick={() => navToApprove("peding")}>
+          审核中
+        </View>
         <View className="photo-grid">
           {pendingPhotos.length > 0 ? (
             pendingPhotos.map((photo, index) => (
