@@ -15,18 +15,38 @@ datasource db {
 }
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  openId String  @unique
-  joinTime DateTime @default(now())
-  photoReviewer Boolean @default(false)
-  sessionKey  String?
-  nickname String
-  avatarUrl String?
-  lastKowtowTime DateTime? 
-  kowtowCount Int @default(0)
-  photos      Photo[]
-  votes       PhotoVote[]
-  categories  Category[] @relation("UserCategories")
+  id            Int         @id @default(autoincrement())
+  openId        String      @unique
+  joinTime      DateTime    @default(now())
+  photoReviewer Boolean     @default(false)
+  sessionKey    String?
+  nickname      String
+  avatarUrl     String?
+  kowtowCount Int @default(0)      // TODO: 数据迁移后删除
+  lastKowtowTime DateTime?         // TODO: 数据迁移后删除
+  dailyStats    UserDailyBehavior[]
+  photos        Photo[]
+  votes         PhotoVote[]
+  categories    Category[]  @relation("UserCategories")
+}
+
+model UserDailyBehavior {
+  user            User      @relation(fields: [openId], references: [openId])
+  openId          String
+  date            DateTime  @db.Date
+  kowtowCount     Int       @default(0)
+  firstKowtowTime DateTime?
+  lastKowtowTime  DateTime?
+  
+  @@id([openId, date])
+  @@index([date])
+}
+
+model GlobalDailyStats {
+  date         DateTime  @id @db.Date
+  totalKowtows Int       @default(0)
+  
+  @@index([date])
 }
 
 model Category {
