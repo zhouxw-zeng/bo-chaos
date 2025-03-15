@@ -22,8 +22,6 @@ model User {
   sessionKey    String?
   nickname      String
   avatarUrl     String?
-  kowtowCount Int @default(0)      // TODO: 数据迁移后删除
-  lastKowtowTime DateTime?         // TODO: 数据迁移后删除
   dailyStats    UserDailyBehavior[]
   photos        Photo[]
   votes         PhotoVote[]

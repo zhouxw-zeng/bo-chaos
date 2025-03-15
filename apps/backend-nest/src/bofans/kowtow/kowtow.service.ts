@@ -10,7 +10,6 @@ export class KowtowService {
     const now = new Date();
     const today = new Date(now);
     today.setHours(0, 0, 0, 0);
-
     // 原子操作更新用户每日数据
     await this.prisma.userDailyBehavior.upsert({
       where: {
