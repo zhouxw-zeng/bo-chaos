@@ -1,8 +1,8 @@
 import Taro from "@tarojs/taro";
 
 // 基础配置
-export const BASE_URL = "http://127.0.0.1:3000/bofans";
-// export const BASE_URL = "https://yuanbo.online/rpg/bofans";
+// export const BASE_URL = "http://127.0.0.1:3000/bofans";
+export const BASE_URL = "https://yuanbo.online/rpg/bofans";
 
 // 微信登录
 export const wxLogin = async () => {
