@@ -6,6 +6,7 @@ import {
   HttpStatus,
   UseGuards,
   Request,
+  Body,
 } from '@nestjs/common';
 import { KowtowService } from './kowtow.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -26,6 +27,16 @@ export class KowtowController {
   @Post('kowtowOnce')
   kowtowOnce(@Request() req: { user: { openId: string } }) {
     const { openId } = req.user;
-    return this.kowtowService.kowtowOnce(openId);
+    return this.kowtowService.kowtow(openId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('batchKowtow')
+  kowtow(
+    @Request() req: { user: { openId: string } },
+    @Body() kowtowDto: { count: number },
+  ) {
+    const { openId } = req.user;
+    return this.kowtowService.kowtow(openId, kowtowDto.count);
   }
 }

@@ -8,10 +8,26 @@ export class UsersService {
 
   async user(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user.findUnique({
+  ): Promise<(User & { kowtowCount: number }) | null> {
+    const result = await this.prisma.user.findUnique({
       where: userWhereUniqueInput,
     });
+
+    if (!result) return null;
+
+    const kowtowCount = await this.prisma.userDailyBehavior.aggregate({
+      where: {
+        openId: result.openId,
+      },
+      _sum: {
+        kowtowCount: true,
+      },
+    });
+
+    return {
+      ...result,
+      kowtowCount: kowtowCount._sum.kowtowCount || 0,
+    };
   }
 
   async users(params: {
