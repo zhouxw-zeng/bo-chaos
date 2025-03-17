@@ -10,7 +10,6 @@ export class KowtowService {
     const now = new Date();
     const today = new Date(now);
     today.setHours(0, 0, 0, 0);
-    // 原子操作更新用户每日数据
     await this.prisma.userDailyBehavior.upsert({
       where: {
         openId_date: {
@@ -30,7 +29,6 @@ export class KowtowService {
         lastKowtowTime: now,
       },
     });
-    // 更新全局统计（可批量合并）
     await this.prisma.globalDailyStats.upsert({
       where: { date: today },
       update: { totalKowtows: { increment: 1 } },
