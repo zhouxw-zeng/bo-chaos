@@ -27,7 +27,7 @@ export class KowtowController {
   @Post('kowtowOnce')
   kowtowOnce(@Request() req: { user: { openId: string } }) {
     const { openId } = req.user;
-    return this.kowtowService.kowtowOnce(openId);
+    return this.kowtowService.kowtow(openId);
   }
 
   @UseGuards(AuthGuard)
@@ -37,6 +37,6 @@ export class KowtowController {
     @Body() kowtowDto: { count: number },
   ) {
     const { openId } = req.user;
-    return this.kowtowService.kowtowOnce(openId, kowtowDto.count);
+    return this.kowtowService.kowtow(openId, kowtowDto.count);
   }
 }

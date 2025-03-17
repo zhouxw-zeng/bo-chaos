@@ -5,8 +5,8 @@ import { PrismaService } from '@/library/prisma.service';
 export class KowtowService {
   constructor(private prisma: PrismaService) {}
 
-  // 磕一下
-  async kowtowOnce(openId: string, count = 1): Promise<boolean> {
+  // 磕
+  async kowtow(openId: string, count = 1): Promise<boolean> {
     const now = new Date();
     const today = new Date(now);
     today.setHours(0, 0, 0, 0);
