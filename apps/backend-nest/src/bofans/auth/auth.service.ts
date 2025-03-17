@@ -31,6 +31,7 @@ export class AuthService {
     let user = await this.usersService.user({ openId: wxRes.openid });
     if (!user) {
       Logger.log(`create user for openId: ${wxRes.openid}`);
+      // @ts-expect-error createUser should be defined
       user = await this.usersService.createUser({
         openId: wxRes.openid,
         nickname: '博粉' + Date.now(),
