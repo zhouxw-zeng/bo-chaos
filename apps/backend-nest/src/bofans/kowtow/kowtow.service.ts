@@ -7,9 +7,37 @@ export class KowtowService {
 
   // 磕一下
   async kowtowOnce(openId: string): Promise<boolean> {
-    await this.prisma.user.update({
-      where: { openId },
-      data: { kowtowCount: { increment: 1 }, lastKowtowTime: new Date() },
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    // 原子操作更新用户每日数据
+    await this.prisma.userDailyBehavior.upsert({
+      where: {
+        openId_date: {
+          openId,
+          date: today,
+        },
+      },
+      create: {
+        openId,
+        date: today,
+        kowtowCount: 1,
+        firstKowtowTime: now,
+        lastKowtowTime: now,
+      },
+      update: {
+        kowtowCount: { increment: 1 },
+        lastKowtowTime: now,
+      },
+    });
+    // 更新全局统计（可批量合并）
+    await this.prisma.globalDailyStats.upsert({
+      where: { date: today },
+      update: { totalKowtows: { increment: 1 } },
+      create: {
+        date: today,
+        totalKowtows: 1,
+      },
     });
     return true;
   }
@@ -23,28 +51,28 @@ export class KowtowService {
     totalCount: number;
     todayKowtowedUser: number;
   }> {
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
     // 并行查询三个数据
     const [iKowtowedToday, totalCount, todayKowtowedUser] = await Promise.all([
       openId
-        ? this.prisma.user.count({
+        ? this.prisma.userDailyBehavior.findUnique({
             where: {
-              openId,
-              lastKowtowTime: {
-                // 大于等于今天0点
-                gte: new Date(new Date().setHours(0, 0, 0, 0)),
+              openId_date: {
+                openId,
+                date: today,
               },
             },
           })
         : Promise.resolve(0),
-      this.prisma.user.aggregate({
+      this.prisma.userDailyBehavior.aggregate({
         _sum: { kowtowCount: true },
       }),
-      this.prisma.user.count({
+      this.prisma.userDailyBehavior.count({
         where: {
-          lastKowtowTime: {
-            // 大于等于今天0点
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
+          date: today,
         },
       }),
     ]);
