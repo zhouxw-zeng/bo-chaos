@@ -6,7 +6,7 @@ export class KowtowService {
   constructor(private prisma: PrismaService) {}
 
   // 磕一下
-  async kowtowOnce(openId: string): Promise<boolean> {
+  async kowtowOnce(openId: string, count = 1): Promise<boolean> {
     const now = new Date();
     const today = new Date(now);
     today.setHours(0, 0, 0, 0);
@@ -20,21 +20,21 @@ export class KowtowService {
       create: {
         openId,
         date: today,
-        kowtowCount: 1,
+        kowtowCount: count,
         firstKowtowTime: now,
         lastKowtowTime: now,
       },
       update: {
-        kowtowCount: { increment: 1 },
+        kowtowCount: { increment: count },
         lastKowtowTime: now,
       },
     });
     await this.prisma.globalDailyStats.upsert({
       where: { date: today },
-      update: { totalKowtows: { increment: 1 } },
+      update: { totalKowtows: { increment: count } },
       create: {
         date: today,
-        totalKowtows: 1,
+        totalKowtows: count,
       },
     });
     return true;
