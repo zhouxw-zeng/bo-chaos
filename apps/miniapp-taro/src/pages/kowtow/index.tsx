@@ -52,20 +52,22 @@ export default function Kowtow() {
   // 每隔两秒调用一次，查询最新磕头状态
   useEffect(() => {
     const timer = setInterval(async () => {
+      let batch = false;
       // 存在待提交磕头数，提交至库中
+      const paramsKowtow = kowtowCountRef.current;
       if (kowtowCountRef.current > 0) {
-        const paramsKowtow = kowtowCountRef.current;
-        batchKowtow({ count: paramsKowtow })
+        await batchKowtow({ count: paramsKowtow })
           .then(() => {
-            const nowKowtow = Taro.getStorageSync("nowKowtowCount");
-            setKowtowCount(nowKowtow - paramsKowtow);
+            batch = true;
           })
           .catch((e) => {
             console.log(`Error=>${e}`);
           });
       }
-      getKowtowStats().then((data: KowtowStats) => {
+      await getKowtowStats().then((data: KowtowStats) => {
         setKowtowStats(data);
+        const nowKowtow = Taro.getStorageSync("nowKowtowCount");
+        if (batch) setKowtowCount(nowKowtow - paramsKowtow);
       });
     }, 2000);
     return () => clearInterval(timer);
