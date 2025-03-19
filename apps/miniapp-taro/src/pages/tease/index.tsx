@@ -1,8 +1,9 @@
-import { View, Image, Text, ScrollView } from "@tarojs/components";
-import { useEffect, useState, useRef } from "react";
+import { View, Text, ScrollView } from "@tarojs/components";
+import { useEffect, useState, useRef, useContext } from "react";
 import Taro from "@tarojs/taro";
 import BoSheng from "@/components/boSheng";
 import { useShare } from "@/lib/share";
+import { AppContext } from "@/lib/context";
 import { getPhotoBySystem } from "../../api/photo";
 import type { PhotoDataType } from "../history";
 import PhotoItem from "../../components/photoItem";
@@ -10,6 +11,8 @@ import PhotoItem from "../../components/photoItem";
 import "./index.scss";
 
 export default function Tease() {
+  const { systemConfig } = useContext(AppContext);
+
   const [photos, setPhotos] = useState<PhotoDataType[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [columns, setColumns] = useState<PhotoDataType[][]>([[], [], []]);
@@ -21,6 +24,14 @@ export default function Tease() {
     path: "/pages/kowtow/index",
     imageUrl: "https://yuanbo.online/bofans_static/images/miniapplogo.png",
   });
+
+  useEffect(() => {
+    if (systemConfig?.inReview) {
+      Taro.setNavigationBarTitle({
+        title: systemConfig.inReview ? "搞笑类图片" : "博史",
+      });
+    }
+  }, [systemConfig]);
 
   const getMinHeightColumnIndex = () => {
     return columnsHeight.current.indexOf(Math.min(...columnsHeight.current));

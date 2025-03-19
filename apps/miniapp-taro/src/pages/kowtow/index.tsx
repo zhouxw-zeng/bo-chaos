@@ -32,7 +32,7 @@ export default function Kowtow() {
   });
 
   useEffect(() => {
-    if (systemConfig && Object.keys(systemConfig).length) {
+    if (systemConfig) {
       Taro.setNavigationBarTitle({
         title: systemConfig.inReview ? "博Fans图片压缩工具简介" : "磕袁",
       });
@@ -160,15 +160,15 @@ export default function Kowtow() {
   };
   return (
     <View className="kowtow-container">
-      {systemConfig &&
-      Object.keys(systemConfig).length &&
-      systemConfig.inReview ? (
+      {systemConfig?.inReview ? (
         <>
           <Text>HI, 博Fans</Text>
           <Text>欢迎使用BoFans图片压缩工具</Text>
           <Text>请在个人中心（我）</Text>
-          <Text>选择需要处理的图片分类，以及上传图片</Text>
+          <Text>系统预设了一些图片分类，帮助你进行图片整理</Text>
+          <Text>选择分类后点击上传图片</Text>
           <Text>带管理员审核通过后，会自动执行压缩流程</Text>
+          <Text>压缩完成后可以在选择的分类中查看图片</Text>
         </>
       ) : (
         <>

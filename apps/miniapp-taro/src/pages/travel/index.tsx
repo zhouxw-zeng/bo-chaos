@@ -1,9 +1,10 @@
 import { View, Button, Image, Text, ScrollView } from "@tarojs/components";
 import { groupBy } from "es-toolkit";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Taro from "@tarojs/taro";
 import BoSheng from "@/components/boSheng";
 import { useShare } from "@/lib/share";
+import { AppContext } from "@/lib/context";
 import PhotoItem from "../../components/photoItem";
 import { getPhotoBySystem } from "../../api/photo";
 
@@ -45,6 +46,8 @@ export interface Vote {
 }
 
 export default function Travel() {
+  const { systemConfig } = useContext(AppContext);
+
   const [photoData, setPhotoData] = useState<
     {
       secondCategory: string;
@@ -59,6 +62,14 @@ export default function Travel() {
     path: "/pages/kowtow/index",
     imageUrl: "https://yuanbo.online/bofans_static/images/miniapplogo.png",
   });
+
+  useEffect(() => {
+    if (systemConfig?.inReview) {
+      Taro.setNavigationBarTitle({
+        title: systemConfig.inReview ? "旅行类图片" : "博史",
+      });
+    }
+  }, [systemConfig]);
 
   const fetchData = async () => {
     try {

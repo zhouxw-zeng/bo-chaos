@@ -7,10 +7,11 @@ import {
   Picker,
   ScrollView,
 } from "@tarojs/components";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { dayjs } from "@mono/utils";
 import Taro from "@tarojs/taro";
 import BoSheng from "@/components/boSheng";
+import { AppContext } from "@/lib/context";
 import { useShare } from "@/lib/share";
 import { groupBy } from "es-toolkit";
 import { getCategories } from "../../api/category";
@@ -38,6 +39,8 @@ export interface CategoryType {
 }
 
 export default function My() {
+  const { systemConfig } = useContext(AppContext);
+
   const [refreshing, setRefreshing] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({
     avatarUrl: "",
@@ -410,22 +413,28 @@ export default function My() {
 
       <BoSheng boxStyle={{ padding: "14px 20px 0 20px" }} />
 
-      <View className="record-section">
-        <View className="section-title">磕头记录</View>
-        <Text>
-          加入BoFans的{" "}
-          {userInfo.joinTime
-            ? Math.max(
-                1,
-                Math.ceil(dayjs().diff(dayjs(userInfo.joinTime), "day", true)),
-              )
-            : 0}{" "}
-          天中， 累计磕头 {userInfo.kowtowCount} 次
-        </Text>
-      </View>
+      {!systemConfig?.inReview && (
+        <View className="record-section">
+          <View className="section-title">磕头记录</View>
+          <Text>
+            加入BoFans的{" "}
+            {userInfo.joinTime
+              ? Math.max(
+                  1,
+                  Math.ceil(
+                    dayjs().diff(dayjs(userInfo.joinTime), "day", true),
+                  ),
+                )
+              : 0}{" "}
+            天中， 累计磕头 {userInfo.kowtowCount} 次
+          </Text>
+        </View>
+      )}
 
       <View className="upload-section">
-        <View className="section-title">珍贵资料上传</View>
+        <View className="section-title">
+          {systemConfig?.inReview ? "图片上传" : "珍贵资料上传"}
+        </View>
         <Picker
           mode="selector"
           range={systems}

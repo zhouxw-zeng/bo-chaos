@@ -1,8 +1,9 @@
-import { View, Button, Image, Text, ScrollView } from "@tarojs/components";
+import { View, Text, ScrollView } from "@tarojs/components";
 import { groupBy } from "es-toolkit";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Taro from "@tarojs/taro";
 import BoSheng from "@/components/boSheng";
+import { AppContext } from "@/lib/context";
 import { useShare } from "@/lib/share";
 import PhotoItem from "../../components/photoItem";
 import { getPhotoBySystem } from "../../api/photo";
@@ -45,6 +46,8 @@ export interface Vote {
 }
 
 export default function History() {
+  const { systemConfig } = useContext(AppContext);
+
   const [photoData, setPhotoData] = useState<
     {
       secondCategory: string;
@@ -53,17 +56,19 @@ export default function History() {
   >([]);
   const [activeCategory, setActiveCategory] = useState<string>("");
 
-  // Taro.useDidShow(() => {
-  //   const pageCtx = Taro.getCurrentInstance().page;
-  //   const tabbar = Taro.getTabBar<CustomTabBar>(pageCtx);
-  //   tabbar?.setSelected(1);
-  // });
-
   useShare({
     title: "来博Fans，一起磕！",
     path: "/pages/history/index",
     imageUrl: "https://yuanbo.online/bofans_static/images/miniapplogo.png",
   });
+
+  useEffect(() => {
+    if (systemConfig?.inReview) {
+      Taro.setNavigationBarTitle({
+        title: systemConfig.inReview ? "历史类图片" : "博史",
+      });
+    }
+  }, [systemConfig]);
 
   const fetchData = async () => {
     try {

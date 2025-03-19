@@ -1,7 +1,8 @@
 import { View, Image, Text, ITouchEvent } from "@tarojs/components";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { votePhoto, cancelPhotoVote, getPhotoById } from "../../api/photo";
 import Taro from "@tarojs/taro";
+import { AppContext } from "@/lib/context";
 import "./index.scss";
 import VoteImage from "../../images/vote.png";
 import VoteActiveImage from "../../images/vote-active.png";
@@ -29,6 +30,7 @@ const PhotoItem: React.FC<PhotoItemProps> = ({
   const [data, setData] = useState(photoData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { systemConfig } = useContext(AppContext);
 
   const handleDownload = (e: ITouchEvent) => {
     e.preventDefault();
@@ -129,12 +131,16 @@ const PhotoItem: React.FC<PhotoItemProps> = ({
           className="action-icon"
           onClick={handleDownload}
         />
-        <Image
-          src={data.hasVoted ? VoteActiveImage : VoteImage}
-          className="action-icon"
-          onClick={onVote}
-        />
-        <Text className="vote-count">{data.votesCount}</Text>
+        {systemConfig?.inReview && (
+          <>
+            <Image
+              src={data.hasVoted ? VoteActiveImage : VoteImage}
+              className="action-icon"
+              onClick={onVote}
+            />
+            <Text className="vote-count">{data.votesCount}</Text>
+          </>
+        )}
       </View>
     </View>
   );
