@@ -41,10 +41,34 @@ export class PhotoController {
     @Request() req: { user: { openId: string } },
     @Param('system') system: string,
   ) {
-    if (env.BOFANS_WEAPP_PUBLISH_STATUS === 'in_review') {
-      return [];
-    }
     const openId = req.user.openId;
+    // 提交审核期间，不区分是否过审，只展示当前用户上传的
+    if (env.BOFANS_WEAPP_PUBLISH_STATUS === 'in_review') {
+      return (await this.photoService.photos({
+        where: {
+          category: {
+            system,
+          },
+          authorOpenId: openId,
+        },
+        include: {
+          category: true,
+          _count: {
+            select: { votes: true },
+          },
+          votes: {
+            where: {
+              userOpenId: openId,
+            },
+          },
+        },
+      })) as (Photo & {
+        votes: PhotoVote[];
+        _count: {
+          votes: number;
+        };
+      })[];
+    }
     const list = (await this.photoService.photos({
       where: {
         category: {
@@ -309,6 +333,13 @@ export class PhotoController {
         },
       },
     });
+
+    if (env.BOFANS_WEAPP_PUBLISH_STATUS === 'in_review') {
+      return photos.map((p) => ({
+        ...p,
+        published: true,
+      }));
+    }
 
     return photos.map((p) => ({
       ...p,
