@@ -5,6 +5,8 @@
   "keywords": [],
   "types": "./dist/src/index.d.ts",
   "main": "./dist/index.js",
+  "module": "./dist/index.esm.js",
+  "type": "module",
   "scripts": {
     "prod": "pnpm run build",
     "prebuild": "rimraf ./dist",

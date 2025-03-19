@@ -6,6 +6,7 @@
   "types": "./dist/src/index.d.ts",
   "main": "./dist/index.js",
   "module": "./dist/index.esm.js",
+  "type": "module",
   "scripts": {
     "test": "vitest",
     "prod": "pnpm run build",

@@ -41,6 +41,9 @@ export class PhotoController {
     @Request() req: { user: { openId: string } },
     @Param('system') system: string,
   ) {
+    if (env.BOFANS_WEAPP_PUBLISH_STATUS === 'in_review') {
+      return [];
+    }
     const openId = req.user.openId;
     const list = (await this.photoService.photos({
       where: {
@@ -76,7 +79,6 @@ export class PhotoController {
         votesCount,
       };
     });
-    Logger.log(JSON.stringify(res[0]));
     return res;
   }
 
