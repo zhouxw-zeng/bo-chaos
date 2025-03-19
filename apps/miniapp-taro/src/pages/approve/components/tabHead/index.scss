@@ -4,10 +4,10 @@
   background: white;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  box-sizing: border-box;
   font-size: 12px;
   border-bottom: 1px solid #787878;
   box-shadow: inset;
+  box-sizing: border-box;
   .tab-block {
     display: flex;
     align-items: center;
@@ -25,13 +25,14 @@
     font-weight: bold;
     .approve-num {
       color: white;
-      font-size: 10px;
-      width: 16px;
+      font-size: 9px;
+      line-height: 16px;
+      min-width: 16px;
       height: 16px;
       border-radius: 8px;
       background: red;
       text-align: center;
-      // line-height: 10px;
+      padding: 0 2px;
     }
   }
   .default-tab {
@@ -39,13 +40,14 @@
     background-color: white;
     .approve-num {
       color: white;
-      font-size: 10px;
-      width: 16px;
+      font-size: 9px;
+      line-height: 16px;
+      min-width: 16px;
       height: 16px;
       border-radius: 8px;
       background: rgb(255, 211, 211);
       text-align: center;
-      // line-height: 10px;
+      padding: 0 2px;
     }
   }
   .icon-block {

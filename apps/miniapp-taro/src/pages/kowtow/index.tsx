@@ -1,17 +1,31 @@
 import { View, Button, Image, Text, Canvas } from "@tarojs/components";
 import { useState, useEffect, useRef, useContext } from "react";
 import Taro from "@tarojs/taro";
-import { throttle } from "es-toolkit";
 import BoSheng from "@/components/boSheng";
 import { AppContext } from "@/lib/context";
 import { useShare } from "@/lib/share";
-import { getKowtowStats, kowtowOnce } from "../../api/kowtow";
+import useLocalStorage from "@/hooks/use-local-storage";
+import { getKowtowStats, batchKowtow } from "../../api/kowtow";
 import "./index.scss";
 import God from "../../images/god.png";
-
+interface KowtowStats {
+  todayKowtowedUser: number | "-";
+  totalCount: number | "-";
+  iKowtowedToday: boolean;
+}
 export default function Kowtow() {
+  const [kowtowCount, setKowtowCount] = useLocalStorage<number>(
+    "nowKowtowCount",
+    0,
+  );
+  const kowtowCountRef = useRef(kowtowCount);
+  // 同步更新 ref
+  useEffect(() => {
+    kowtowCountRef.current = kowtowCount;
+  }, [kowtowCount]);
+
   const { systemConfig } = useContext(AppContext);
-  const [kowtowStats, setKowtowStats] = useState({
+  const [kowtowStats, setKowtowStats] = useState<KowtowStats>({
     todayKowtowedUser: "-",
     totalCount: "-",
     iKowtowedToday: false,
@@ -31,11 +45,29 @@ export default function Kowtow() {
     imageUrl: "https://yuanbo.online/bofans_static/images/miniapplogo.png",
   });
 
+  function handleKowtow() {
+    createLikeAnimation();
+    setKowtowCount(kowtowCount + 1);
+  }
   // 每隔两秒调用一次，查询最新磕头状态
   useEffect(() => {
-    const timer = setInterval(() => {
-      getKowtowStats().then((data) => {
-        setKowtowStats(data as any);
+    const timer = setInterval(async () => {
+      let batch = false;
+      // 存在待提交磕头数，提交至库中
+      const paramsKowtow = kowtowCountRef.current;
+      if (kowtowCountRef.current > 0) {
+        await batchKowtow({ count: paramsKowtow })
+          .then(() => {
+            batch = true;
+          })
+          .catch((e) => {
+            console.log(`Error=>${e}`);
+          });
+      }
+      await getKowtowStats().then((data: KowtowStats) => {
+        setKowtowStats(data);
+        const nowKowtow = Taro.getStorageSync("nowKowtowCount");
+        if (batch) setKowtowCount(nowKowtow - paramsKowtow);
       });
     }, 2000);
     return () => clearInterval(timer);
@@ -126,12 +158,6 @@ export default function Kowtow() {
         animate();
       });
   };
-
-  function handleKowtow() {
-    createLikeAnimation();
-    kowtowOnce();
-  }
-
   return (
     <View className="kowtow-container">
       {systemConfig &&
@@ -147,7 +173,13 @@ export default function Kowtow() {
       ) : (
         <>
           <BoSheng />
-          <Text>全球博粉累计磕头 {kowtowStats.totalCount} 次</Text>
+          <Text>
+            全球博粉累计磕头{" "}
+            {kowtowCount && kowtowStats.totalCount !== "-"
+              ? (kowtowStats.totalCount as number) + kowtowCount
+              : kowtowStats.totalCount}{" "}
+            次
+          </Text>
           <Text>
             今日签到博粉 {kowtowStats.todayKowtowedUser}{" "}
             <Text className="utc">(utc+8)</Text>
@@ -167,7 +199,7 @@ export default function Kowtow() {
           <Button
             className="submit-kowtow"
             type="primary"
-            onClick={throttle(handleKowtow, 260)}
+            onClick={handleKowtow}
           >
             磕
           </Button>
