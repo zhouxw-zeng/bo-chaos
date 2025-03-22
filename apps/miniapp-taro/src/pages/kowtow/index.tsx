@@ -8,10 +8,29 @@ import useLocalStorage from "@/hooks/use-local-storage";
 import { getKowtowStats, batchKowtow } from "../../api/kowtow";
 import "./index.scss";
 import God from "../../images/god.png";
+import img1 from "../../images/kowtow/1.png";
+import img2 from "../../images/kowtow/2.png";
+import img3 from "../../images/kowtow/3.png";
+import img4 from "../../images/kowtow/4.png";
+import img5 from "../../images/kowtow/5.png";
+import img6 from "../../images/kowtow/6.png";
+import img7 from "../../images/kowtow/7.png";
+import img8 from "../../images/kowtow/8.png";
+import img9 from "../../images/kowtow/9.png";
+import img10 from "../../images/kowtow/10.png";
+import img11 from "../../images/kowtow/11.png";
+import img12 from "../../images/kowtow/12.png";
 interface KowtowStats {
   todayKowtowedUser: number | "-";
   totalCount: number | "-";
   iKowtowedToday: boolean;
+}
+interface Animation {
+  id: number;
+  x: number;
+  y: number;
+  img: string;
+  opacity: number;
 }
 export default function Kowtow() {
   const [kowtowCount, setKowtowCount] = useLocalStorage<number>(
@@ -23,6 +42,10 @@ export default function Kowtow() {
   useEffect(() => {
     kowtowCountRef.current = kowtowCount;
   }, [kowtowCount]);
+
+  const animationQueue = useRef<Animation[]>([]);
+  // 创捷一个动画状态 防止动画频繁添加导致速度错误
+  const animationState = useRef(false);
 
   const { systemConfig } = useContext(AppContext);
   const [kowtowStats, setKowtowStats] = useState<KowtowStats>({
@@ -45,68 +68,74 @@ export default function Kowtow() {
     imageUrl: "https://yuanbo.online/bofans_static/images/miniapplogo.png",
   });
 
-  function handleKowtow() {
-    createLikeAnimation();
-    setKowtowCount(kowtowCount + 1);
+  async function handleKowtow() {
+    try {
+      await createLikeAnimation();
+      await setKowtowCount(kowtowCount + 1);
+    } catch (e: any) {
+      console.log("ERROR=>", e);
+    }
   }
   // 每隔两秒调用一次，查询最新磕头状态
   useEffect(() => {
     const timer = setInterval(async () => {
-      let batch = false;
+      let batchBlockData;
       // 存在待提交磕头数，提交至库中
       const paramsKowtow = kowtowCountRef.current;
-      if (kowtowCountRef.current > 0) {
-        await batchKowtow({ count: paramsKowtow })
-          .then(() => {
-            batch = true;
-          })
-          .catch((e) => {
-            console.log(`Error=>${e}`);
-          });
+      if (paramsKowtow > 0) {
+        batchBlockData = await batchKowtow({ count: paramsKowtow });
       }
-      await getKowtowStats().then((data: KowtowStats) => {
-        setKowtowStats(data);
-        const nowKowtow = Taro.getStorageSync("nowKowtowCount");
-        if (batch) setKowtowCount(nowKowtow - paramsKowtow);
-      });
+      const kowtowStatsData: KowtowStats =
+        (await getKowtowStats()) as KowtowStats;
+      if (kowtowStatsData) {
+        setKowtowStats(kowtowStatsData);
+        batchBlockData && setKowtowCount(0);
+      }
     }, 2000);
     return () => clearInterval(timer);
   }, []);
 
-  const animationQueue = useRef<number[]>([]);
   // 点赞图标库
-  const godIcon = [
-    "🌼",
-    "👍",
-    "🌹",
-    "🚀",
-    "⭐",
-    "😻",
-    "🦄",
-    "🥳",
-    "🧸",
-    "🧨",
-    "❤️",
-    "💕",
-    "🍔",
+  // const godIcon = [
+  //   "🌼",
+  //   "👍",
+  //   "🌹",
+  //   "🚀",
+  //   "⭐",
+  //   "😻",
+  //   "🦄",
+  //   "🥳",
+  //   "🧸",
+  //   "🧨",
+  //   "❤️",
+  //   "💕",
+  //   "🍔",
+  // ];
+
+  const godImg = [
+    img1,
+    img2,
+    img3,
+    img4,
+    img5,
+    img6,
+    img7,
+    img8,
+    img9,
+    img10,
+    img11,
+    img12,
   ];
 
-  useEffect(() => {
-    // 初始化 canvas context
-    const query = Taro.createSelectorQuery();
-    query
-      .select("#god-bo-canvas")
-      .fields({ node: true, size: true })
-      .exec((res) => {
-        // const canvas = res[0]?.node;
-        // const ctx = canvas?.getContext("2d");
-        // const dpr = Taro.getSystemInfoSync().pixelRatio;
-        // canvas.width = res[0].width * dpr;
-        // canvas.height = res[0].height * dpr;
-        // ctx.scale(dpr, dpr);
-      });
-  }, []);
-
+  // useEffect(() => {
+  //   // 初始化 canvas context
+  //   const query = Taro.createSelectorQuery();
+  //   query
+  //     .select("#god-bo-canvas")
+  //     .fields({ node: true, size: true })
+  //     .exec((res) => {
+  //     });
+  // }, []);
   // 创建点赞动画
   const createLikeAnimation = () => {
     let currentNumber = Math.floor(Math.random() * 12);
@@ -120,41 +149,58 @@ export default function Kowtow() {
           return;
         }
         const ctx = canvas.getContext("2d");
-
-        const startX = canvas.width / 8;
+        const xSkew = Math.ceil(Math.random() * 200);
+        console.log(xSkew, "xSkew");
+        const startX = canvas.width / 6 + xSkew;
         const startY = canvas.height - 20;
         const animationId = Date.now();
-
-        let opacity = 1;
-        let y = startY;
-
+        let image = canvas.createImage();
+        image.src = godImg[currentNumber];
+        animationQueue.current.push({
+          id: animationId,
+          x: startX,
+          y: startY,
+          img: image,
+          opacity: 1,
+        });
+        image = null;
+        if (animationState.current) return;
+        animationState.current = true;
         const animate = () => {
-          // 清除这个动画的路径
-          ctx.clearRect(startX - 48, y - 48, 384, 96);
-
-          y -= 2; // 向上移动
-          opacity -= 0.02; // 逐渐变透明
-
-          if (opacity > 0) {
+          const animations = animationQueue.current.filter(
+            (animation: Animation) => animation.opacity > 0,
+          );
+          animationQueue.current = animations.map((animation: Animation) => {
+            const { id, x, y, opacity, img } = animation;
+            return {
+              id,
+              x,
+              y: y - 2,
+              img,
+              opacity: parseFloat((opacity - 0.02).toFixed(2)),
+            };
+          });
+          animationQueue.current.forEach((animation: Animation) => {
+            ctx.clearRect(animation.x - 48, animation.y - 48, 384, 96);
             ctx.save();
-            ctx.font = "48px serif";
-            ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
-            ctx.textAlign = "center";
-            ctx.scale(4, 1);
-            ctx.fillText(godIcon[currentNumber], startX, y);
+            ctx.globalAlpha = animation.opacity; // 设置透明度
+            ctx.drawImage(
+              animation.img,
+              animation.x - 48,
+              animation.y - 48,
+              120,
+              60,
+            ); // 绘制图片
             ctx.restore();
 
+            ctx.restore();
+          });
+          if (animationQueue.current.length > 0) {
             requestAnimationFrame(animate);
           } else {
-            // 动画结束，从队列中移除
-            animationQueue.current = animationQueue.current.filter(
-              (id) => id !== animationId,
-            );
+            animationState.current = false;
           }
         };
-
-        // 将动画添加到队列
-        animationQueue.current.push(animationId);
         animate();
       });
   };
