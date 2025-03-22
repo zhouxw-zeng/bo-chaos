@@ -36,6 +36,8 @@ astro退休倒计时
 - [x] VSCode插件: [bo-retire](https://marketplace.visualstudio.com/items?itemName=zhangyiming.bo-retire)
   - [x] 状态栏显示倒计时、跳转、一次性提示
   - [ ] 自定义计时
+- [ ] Chrome插件
+  - [ ] 倒计时注入页面右下角，透明度，可拖拽
 
 后端
 
@@ -67,6 +69,7 @@ astro退休倒计时
 - [ ] 我
   - [x] 图片上传增加单张进度展示（图片上面圆形进度条）
   - [ ] 审核状态分为审核中、已通过、已驳回，分三个tab，tab上标识数量，分页
+  - [ ] 磕头历史折线图，磕头趋势
 
 Work FLow
 
