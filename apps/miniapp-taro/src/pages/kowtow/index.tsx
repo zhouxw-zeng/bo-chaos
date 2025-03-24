@@ -8,18 +8,6 @@ import useLocalStorage from "@/hooks/use-local-storage";
 import { getKowtowStats, batchKowtow } from "../../api/kowtow";
 import "./index.scss";
 import God from "../../images/god.png";
-import img1 from "../../images/kowtow/1.png";
-import img2 from "../../images/kowtow/2.png";
-import img3 from "../../images/kowtow/3.png";
-import img4 from "../../images/kowtow/4.png";
-import img5 from "../../images/kowtow/5.png";
-import img6 from "../../images/kowtow/6.png";
-import img7 from "../../images/kowtow/7.png";
-import img8 from "../../images/kowtow/8.png";
-import img9 from "../../images/kowtow/9.png";
-import img10 from "../../images/kowtow/10.png";
-import img11 from "../../images/kowtow/11.png";
-import img12 from "../../images/kowtow/12.png";
 interface KowtowStats {
   todayKowtowedUser: number | "-";
   totalCount: number | "-";
@@ -29,7 +17,7 @@ interface Animation {
   id: number;
   x: number;
   y: number;
-  img: string;
+  text: string;
   opacity: number;
 }
 export default function Kowtow() {
@@ -67,15 +55,14 @@ export default function Kowtow() {
     path: "/pages/kowtow/index",
     imageUrl: "https://yuanbo.online/bofans_static/images/miniapplogo.png",
   });
-
-  async function handleKowtow() {
+  const handleKowtow = async () => {
     try {
       await createLikeAnimation();
       await setKowtowCount(kowtowCount + 1);
     } catch (e: any) {
       console.log("ERROR=>", e);
     }
-  }
+  };
   // 每隔两秒调用一次，查询最新磕头状态
   useEffect(() => {
     const timer = setInterval(async () => {
@@ -96,35 +83,20 @@ export default function Kowtow() {
   }, []);
 
   // 点赞图标库
-  // const godIcon = [
-  //   "🌼",
-  //   "👍",
-  //   "🌹",
-  //   "🚀",
-  //   "⭐",
-  //   "😻",
-  //   "🦄",
-  //   "🥳",
-  //   "🧸",
-  //   "🧨",
-  //   "❤️",
-  //   "💕",
-  //   "🍔",
-  // ];
-
-  const godImg = [
-    img1,
-    img2,
-    img3,
-    img4,
-    img5,
-    img6,
-    img7,
-    img8,
-    img9,
-    img10,
-    img11,
-    img12,
+  const goodIcon = [
+    "🌼",
+    "👍",
+    "🌹",
+    "🚀",
+    "⭐",
+    "😻",
+    "🦄",
+    "🥳",
+    "🧸",
+    "🧨",
+    "❤️",
+    "💕",
+    "🍔",
   ];
 
   // useEffect(() => {
@@ -149,51 +121,46 @@ export default function Kowtow() {
           return;
         }
         const ctx = canvas.getContext("2d");
-        const xSkew = Math.ceil(Math.random() * 200);
-        console.log(xSkew, "xSkew");
+        const xSkew = Math.ceil(Math.random() * 180);
         const startX = canvas.width / 6 + xSkew;
         const startY = canvas.height - 20;
         const animationId = Date.now();
-        let image = canvas.createImage();
-        image.src = godImg[currentNumber];
         animationQueue.current.push({
           id: animationId,
           x: startX,
           y: startY,
-          img: image,
+          text: goodIcon[currentNumber],
           opacity: 1,
         });
-        image = null;
+        // image = null;
         if (animationState.current) return;
         animationState.current = true;
         const animate = () => {
           const animations = animationQueue.current.filter(
             (animation: Animation) => animation.opacity > 0,
           );
+          // 更新文字阶段
           animationQueue.current = animations.map((animation: Animation) => {
-            const { id, x, y, opacity, img } = animation;
+            let { id, x, y, opacity, text } = animation;
             return {
               id,
               x,
               y: y - 2,
-              img,
-              opacity: parseFloat((opacity - 0.02).toFixed(2)),
+              text,
+              opacity: opacity - 0.02,
             };
           });
-          animationQueue.current.forEach((animation: Animation) => {
-            ctx.clearRect(animation.x - 48, animation.y - 48, 384, 96);
-            ctx.save();
-            ctx.globalAlpha = animation.opacity; // 设置透明度
-            ctx.drawImage(
-              animation.img,
-              animation.x - 48,
-              animation.y - 48,
-              120,
-              60,
-            ); // 绘制图片
-            ctx.restore();
 
-            ctx.restore();
+          ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空画布
+          // 渲染文字阶段
+          animationQueue.current.map((animation: Animation) => {
+            // 绘制阶段
+            ctx.font = "48px serif";
+            ctx.fillStyle = `rgba(255, 0, 0, ${animation.opacity})`;
+            ctx.textAlign = "center";
+            // ctx.scale(3, 1);
+            // ctx.setTransform(1, 0, 0, 1, 0, 0)
+            ctx.fillText(animation.text, animation.x, animation.y);
           });
           if (animationQueue.current.length > 0) {
             requestAnimationFrame(animate);
