@@ -199,7 +199,7 @@ export default function Kowtow() {
           </Text>
           <View className="god-bo">
             <Canvas type="2d" id="god-bo-canvas" className="canvas" />
-            <Image src={God}></Image>
+            <Image className="image" src={God}></Image>
           </View>
           <Text className="love">博爱世人</Text>
           {kowtowStats.totalCount !== "-" && (
