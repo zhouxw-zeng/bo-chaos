@@ -4,8 +4,8 @@
   width: 100%;
   // $w80toHeight: calc(100vw * 0.75);
   // 设置父盒子固定宽高比为 4 / 3
-  height: calc(100vw * 0.75 - 44px)
-  
+  height: calc(100vw * 0.75 - 44px);
+  z-index: 1;
 }
 .swiper-item {
   width: 100%;

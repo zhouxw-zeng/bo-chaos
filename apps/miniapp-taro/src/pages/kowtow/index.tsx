@@ -216,7 +216,7 @@ export default function Kowtow() {
           animationQueue.current.map((animation: Animation) => {
             // 绘制阶段
             ctx.save();
-            ctx.font = "36px serif";
+            ctx.font = `${fontSize}px serif`;
             ctx.fillStyle = `rgba(255, 0, 0, ${animation.opacity})`;
             ctx.textAlign = "center";
             ctx.scale(3, 1);
@@ -269,8 +269,6 @@ export default function Kowtow() {
                 width: ${canvasInfo.canvas.width}px;`}
               className="canvas"
             />
-            {/* <Image className="image" src={God}></Image> */}
-
             <SwiperImg
               changeSwiper={changeSwiper}
               images={swiperImages}
