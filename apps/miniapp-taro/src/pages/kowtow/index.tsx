@@ -5,9 +5,12 @@ import BoSheng from "@/components/boSheng";
 import { AppContext } from "@/lib/context";
 import { useShare } from "@/lib/share";
 import useLocalStorage from "@/hooks/use-local-storage";
+import God from "@/images/kowtow/god.png";
+import God2 from "@/images/kowtow/god2.jpg";
+import God3 from "@/images/kowtow/god3.png";
 import { getKowtowStats, batchKowtow } from "../../api/kowtow";
+import SwiperImg from "@/components/swiperImg";
 import "./index.scss";
-import God from "../../images/god.png";
 interface KowtowStats {
   todayKowtowedUser: number | "-";
   totalCount: number | "-";
@@ -25,6 +28,47 @@ export default function Kowtow() {
     "nowKowtowCount",
     0,
   );
+  const swiperImages = [
+    {
+      img: God,
+      ratio: (351 / 476).toFixed(2),
+      canvas: {
+        canvasX: "15%",
+        canvasY: "68%",
+        width: 90,
+        height: 120,
+      },
+    },
+    {
+      img: God2,
+      ratio: (256 / 388).toFixed(2),
+      canvas: {
+        canvasX: "20%",
+        canvasY: "18%",
+        width: 90,
+        height: 120,
+      },
+    },
+    {
+      img: God3,
+      ratio: (184 / 210).toFixed(2),
+      canvas: {
+        canvasX: "20%",
+        canvasY: "10%",
+        width: 90,
+        height: 120,
+      },
+    },
+  ];
+  const [canvasInfo, setCanvasInfo] = useState({
+    swiperIndex: 0,
+    canvas: {
+      canvasX: "15%",
+      canvasY: "68%",
+      width: 90,
+      height: 120,
+    },
+  });
   const kowtowCountRef = useRef(kowtowCount);
   // 同步更新 ref
   useEffect(() => {
@@ -57,12 +101,14 @@ export default function Kowtow() {
   });
   const handleKowtow = async () => {
     try {
+      console.log("animationQueue", animationQueue.current);
       await createLikeAnimation();
       await setKowtowCount(kowtowCount + 1);
     } catch (e: any) {
       console.log("ERROR=>", e);
     }
   };
+
   // 每隔两秒调用一次，查询最新磕头状态
   useEffect(() => {
     const timer = setInterval(async () => {
@@ -82,6 +128,16 @@ export default function Kowtow() {
     return () => clearInterval(timer);
   }, []);
 
+  // 轮播图变化 修改点赞canvas位置
+  const changeSwiper = (e: number) => {
+    const info = swiperImages[e];
+    const { canvas } = info;
+    setCanvasInfo({
+      swiperIndex: e,
+      canvas,
+    });
+  };
+
   // 点赞图标库
   const goodIcon = [
     "🌼",
@@ -89,13 +145,12 @@ export default function Kowtow() {
     "🌹",
     "🚀",
     "⭐",
-    "😻",
     "🦄",
     "🥳",
     "🧸",
     "🧨",
-    "❤️",
-    "💕",
+    "🤩",
+    "😎",
     "🍔",
   ];
 
@@ -112,6 +167,7 @@ export default function Kowtow() {
   const createLikeAnimation = () => {
     let currentNumber = Math.floor(Math.random() * 12);
     const query = Taro.createSelectorQuery();
+    const fontSize = 36;
     query
       .select("#god-bo-canvas")
       .fields({ node: true, size: true })
@@ -121,8 +177,10 @@ export default function Kowtow() {
           return;
         }
         const ctx = canvas.getContext("2d");
-        const xSkew = Math.ceil(Math.random() * 180);
-        const startX = canvas.width / 6 + xSkew;
+        const xSkew = Math.ceil((Math.random() * canvas.width) / 6);
+        const startX = fontSize / 2 + xSkew;
+        console.log(canvas.width, startX, "startX");
+
         const startY = canvas.height - 20;
         const animationId = Date.now();
         animationQueue.current.push({
@@ -136,31 +194,35 @@ export default function Kowtow() {
         if (animationState.current) return;
         animationState.current = true;
         const animate = () => {
-          const animations = animationQueue.current.filter(
+          ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空画布
+          // 更新文字阶段
+          animationQueue.current = animationQueue.current.filter(
             (animation: Animation) => animation.opacity > 0,
           );
-          // 更新文字阶段
-          animationQueue.current = animations.map((animation: Animation) => {
-            let { id, x, y, opacity, text } = animation;
-            return {
-              id,
-              x,
-              y: y - 2,
-              text,
-              opacity: opacity - 0.02,
-            };
-          });
+          animationQueue.current = animationQueue.current.map(
+            (animation: Animation) => {
+              let { id, x, y, opacity, text } = animation;
+              return {
+                id,
+                x,
+                y: (y -= 2),
+                text,
+                opacity: parseFloat((opacity - 0.02).toFixed(2)),
+              };
+            },
+          );
 
-          ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空画布
           // 渲染文字阶段
           animationQueue.current.map((animation: Animation) => {
             // 绘制阶段
-            ctx.font = "48px serif";
+            ctx.save();
+            ctx.font = `${fontSize}px serif`;
             ctx.fillStyle = `rgba(255, 0, 0, ${animation.opacity})`;
             ctx.textAlign = "center";
-            // ctx.scale(3, 1);
-            // ctx.setTransform(1, 0, 0, 1, 0, 0)
+            ctx.scale(3, 1);
             ctx.fillText(animation.text, animation.x, animation.y);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.restore();
           });
           if (animationQueue.current.length > 0) {
             requestAnimationFrame(animate);
@@ -198,8 +260,20 @@ export default function Kowtow() {
             <Text className="utc">(utc+8)</Text>
           </Text>
           <View className="god-bo">
-            <Canvas type="2d" id="god-bo-canvas" className="canvas" />
-            <Image className="image" src={God}></Image>
+            <Canvas
+              type="2d"
+              id="god-bo-canvas"
+              style={`top: ${canvasInfo.canvas.canvasX};
+                left: ${canvasInfo.canvas.canvasY};
+                height: ${canvasInfo.canvas.height}px;
+                width: ${canvasInfo.canvas.width}px;`}
+              className="canvas"
+            />
+            <SwiperImg
+              changeSwiper={changeSwiper}
+              images={swiperImages}
+              accountIndex={canvasInfo.swiperIndex}
+            />
           </View>
           <Text className="love">博爱世人</Text>
           {kowtowStats.totalCount !== "-" && (
