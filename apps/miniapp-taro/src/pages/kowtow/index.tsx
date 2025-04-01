@@ -1,5 +1,5 @@
 import { View, Button, Image, Text, Canvas } from "@tarojs/components";
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef, useContext, useCallback } from "react";
 import Taro from "@tarojs/taro";
 import BoSheng from "@/components/boSheng";
 import { AppContext } from "@/lib/context";
@@ -99,15 +99,14 @@ export default function Kowtow() {
     path: "/pages/kowtow/index",
     imageUrl: "https://yuanbo.online/bofans_static/images/miniapplogo.png",
   });
-  const handleKowtow = async () => {
+  const handleKowtow = useCallback(async () => {
     try {
-      console.log("animationQueue", animationQueue.current);
       await createLikeAnimation();
       await setKowtowCount(kowtowCount + 1);
     } catch (e: any) {
       console.log("ERROR=>", e);
     }
-  };
+  }, []);
 
   // 每隔两秒调用一次，查询最新磕头状态
   useEffect(() => {
@@ -179,7 +178,6 @@ export default function Kowtow() {
         const ctx = canvas.getContext("2d");
         const xSkew = Math.ceil((Math.random() * canvas.width) / 6);
         const startX = fontSize / 2 + xSkew;
-        console.log(canvas.width, startX, "startX");
 
         const startY = canvas.height - 20;
         const animationId = Date.now();
