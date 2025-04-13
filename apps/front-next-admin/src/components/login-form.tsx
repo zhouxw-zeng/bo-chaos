@@ -33,7 +33,7 @@ export function LoginForm({
       const response = await login({ account, password });
       if (response === true) {
         // 登录成功，跳转到审核页面
-        router.push("/bofans_admin/review");
+        router.push("/bofans_admin");
       } else {
         setError("账号或密码错误");
       }

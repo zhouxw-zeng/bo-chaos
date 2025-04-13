@@ -4,5 +4,5 @@ export default function page() {
   getReviewList().then((res) => {
     console.log(res);
   });
-  return <div>123</div>;
+  return <div> Welcome to Bofans Home</div>;
 }

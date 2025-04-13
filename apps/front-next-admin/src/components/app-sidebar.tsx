@@ -11,17 +11,23 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { basePath } from "../../env";
 
 // This is sample data.
 const data = {
   navMain: [
     {
       title: "Hello BoFans",
-      url: "#",
+      url: "/bofans_admin",
       items: [
         {
           title: "Review",
-          url: "/bofans_admin",
+          url: "/bofans_admin/review",
+          isActive: true,
+        },
+        {
+          title: "Carousel",
+          url: "/bofans_admin/carousel",
           isActive: true,
         },
       ],
@@ -38,13 +44,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+            <SidebarGroupLabel>
+              <a href={`${basePath}${item.url}`}>{item.title}</a>
+              {/* { item.title } */}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
+                      <a href={`${basePath}${item.url}`}>{item.title}</a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
