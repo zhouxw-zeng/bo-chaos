@@ -11,6 +11,7 @@ import {
 
 import { CarouselService } from './carousel.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { CarouselDto } from './carousel.dto';
 
 @Controller('bofans/carousel')
 export class CarouselController {
@@ -28,17 +29,7 @@ export class CarouselController {
   carouselUpdate(
     @Request() req: { use: { openId: string } },
     @Body()
-    carouselDto: {
-      url: string;
-      width: string;
-      height: string;
-      carouselCanvas: {
-        width: number;
-        height: number;
-        x: number;
-        y: number;
-      };
-    },
+    carouselDto: CarouselDto,
   ) {
     const { openId } = req.use;
     return this.CarouselService.carouselUpdate(openId, carouselDto);

@@ -1,19 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/library/prisma.service';
-
-interface Carousel {
-  id: number;
-  width: number;
-  height: number;
-  kowtowCanvas: any;
-}
+import { Carousel } from './carousel.entity';
 
 @Injectable()
 export class CarouselService {
   constructor(private prisma: PrismaService) {}
-  async carousel(openId?: string): Promise<Carousel[]> {
+  async carousel(openId?: string): Promise<{ code: number; list: Carousel[] }> {
     // Prisma TODO
-    return [];
+    return {
+      code: 200,
+      list: [],
+    };
   }
   async carouselUpdate(openId: string, params): Promise<boolean> {
     const now = new Date();
